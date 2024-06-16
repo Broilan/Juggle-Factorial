@@ -40,14 +40,3 @@ p {
 .button:hover {
     background-color: #45a049;
 }
-.settings-button {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-}

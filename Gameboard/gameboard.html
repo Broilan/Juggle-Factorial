@@ -4,18 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jiggle Factorial</title>
-    <link rel = "stylesheet" href = "index.css">
+    <link rel = "stylesheet" href = "gameboard.css">
 </head>
 <body>
     <h1 class="header">Jiggle Factorial</h1>
+    <button class="settings-button" id="settingsBtn">Settings</button>
     <div id="circle-container">
         <div id="delay-message">Wait for the delay timer to finish before selecting!</div>
+    </div>
+    <div>
+        <button id="start-btn">start</button>
+        <button id="stop-btn">stop</button>
     </div>
     <div id="info">
         <div id="level-display">Level: 3</div>
         <div id="timer-display">Timer: 30s</div>
         <div id="average-level-display">Average Level: 3</div>
     </div>
+    <div id="modal-container"></div>
+
+    <!-- <script>
+        // Function to load the modal HTML and CSS
+        function loadModal() {
+            fetch('../Settings/settings-modal.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('modal-container').innerHTML = data;
+
+                    // Get the modal
+                    let modal = document.getElementById("settingsModal");
+
+                    // Get the button that opens the modal
+                    let openModalBtn = document.getElementById("settingsBtn");
+
+                    // Get the <span> element that closes the modal
+                    let closeModalBtn = document.getElementById("closeBtn");
+
+                    // When the user clicks on the button, open the modal
+                    openModalBtn.onclick = () => {
+                        modal.style.display = "flex";
+                        modal.style.justifyContent = "center";
+                        modal.style.alignItems = "center";
+                    }
+
+                    // When the user clicks on <span> (x), close the modal
+                    closeModalBtn.onclick = () => {
+                        modal.style.display = "none";
+                    }
+
+                    // When the user clicks anywhere outside of the modal, close it
+                    window.onclick = (event) => {
+                        if (event.target == modal) {
+                            modal.style.display = "none";
+                        }
+                    }
+                });
+        }
+
+        // Load the modal when the page loads
+        window.onload = loadModal;
+    </script> -->
         <script src = "../index.js"></script>
 </body>
 </html>

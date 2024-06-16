@@ -1,0 +1,73 @@
+<!-- /Modals/settings-modal.html -->
+<link rel="stylesheet" href="settings-modal.css">
+
+<form id="settingsModal" class="modal">
+    <div class="modal-content">
+        <h1>Settings</h1>
+        <span class="close" id="closeBtn">&times;</span>
+
+        <div id="checkbox-controls">
+
+            <label for="span-select">Span Types</label>
+            <div class="select-checkboxes" id="span-select">
+            <input type="checkbox" id="forwards-box">Forward</input>
+            <input type="checkbox" id="backwards-box">Backwards</input>
+            <input type="checkbox" id="sequencing-box">Sequencing</input>   
+            </div>
+            
+
+            <label for="movement-select">Movement Types</label>
+            <div class="select-checkboxes" id="movement-select">
+            <input type="checkbox" id="backwards-btn">Normal</input>
+            <input type="checkbox" id="random-btn">Rotation</input>
+            </div>
+        </div>
+
+        <div id="button-controls">    
+            <button id="flash-btn">Flash Mode: Off</button>
+
+            <button id="non-consecutive-btn">Consecutive Mode: On</button>
+
+            <button id="progression-btn">Auto Progression: On</button>
+
+            <button id="show-answers-btn">Show Answers: On</button>
+        </div>
+
+        <div id="input-controls">
+            <div class="input">
+                <label for="level-input">Level</label>
+                <input type="number" id="level-input" value="3" min="1" />
+            </div>
+            <div class="input">
+                <label for="timer-input">Timer</label>
+                <input type="number" id="timer-input" value="30" min="1" />
+            </div>
+            <div class="input">
+                <label for="select-time-input">Select Time (s)</label>
+                <input type="number" id="select-time-input" value="1" step="0.01" min="0.1" />
+            </div>
+            <div class="input">
+                <label for="blue-distractors-input">Blue Distractors</label>
+                <input type="number" id="blue-distractors-input" value="5" min="0" />
+            </div>
+            <div class="input">
+                <label for="random-distractors-input">Rand. Distractors</label>
+                <input type="number" id="random-distractors-input" value="5" min="0" />
+            </div>
+            <div class="input">
+                <label for="speed-input">Speed</label>
+                <input type="number" id="speed-input" value="1" step="0.1" min="0.1" />
+            </div>
+            <div class="input">
+                <label for="delay-input">Delay Time (s)</label>
+                <input type="number" id="delay-input" value="2" step="0.1" min="0.1" />
+            </div>
+            <div class="input">
+                <label for="rotation-groups-input">Rotation Groups</label>
+                <input type="number" id="rotation-groups-input" value="1" min="1" max="4"" />
+            </div>
+
+    </div>
+    </div>
+
+</form>

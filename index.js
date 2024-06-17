@@ -72,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
             level: 3,
             timer: 30,
             selectTime: 1,
-            blueDistractors: 5,
             randomDistractors: 5,
             speed: 1,
             delayTime: 2,
@@ -108,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('level-input').value = settings.level;
             document.getElementById('timer-input').value = settings.timer;
             document.getElementById('select-time-input').value = settings.selectTime;
-            document.getElementById('blue-distractors-input').value = settings.blueDistractors;
             document.getElementById('random-distractors-input').value = settings.randomDistractors;
             document.getElementById('speed-input').value = settings.speed;
             document.getElementById('delay-input').value = settings.delayTime;
@@ -132,7 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
             settings.level = parseInt(document.getElementById('level-input').value, 10);
             settings.timer = parseInt(document.getElementById('timer-input').value, 10);
             settings.selectTime = parseFloat(document.getElementById('select-time-input').value);
-            settings.blueDistractors = parseInt(document.getElementById('blue-distractors-input').value, 10);
             settings.randomDistractors = parseInt(document.getElementById('random-distractors-input').value, 10);
             settings.speed = parseFloat(document.getElementById('speed-input').value);
             settings.delayTime = parseFloat(document.getElementById('delay-input').value);
@@ -210,11 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const levelDisplay = document.getElementById('level-display');
         const timerDisplay = document.getElementById('timer-display');
         const averageLevelDisplay = document.getElementById('average-level-display');
-        const delayMessage = document.getElementById('delay-message');
         const levelInput = document.getElementById('level-input');
         const timerInput = document.getElementById('timer-input');
         const selectTimeInput = document.getElementById('select-time-input');
-        const blueDistractorsInput = document.getElementById('blue-distractors-input');
         const randomDistractorsInput = document.getElementById('random-distractors-input');
         const speedInput = document.getElementById('speed-input');
         const delayInput = document.getElementById('delay-input');
@@ -231,11 +226,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let animationInterval;
         let flashInterval;
         let selectionTimeout;
-        let delayTimeout;
         let timer;
         let timeLeft = parseInt(timerInput.value, 10);  // Default timer value
         let selectTime = parseFloat(selectTimeInput.value) * 1000;  // Convert to milliseconds
-        let blueDistractors = parseInt(blueDistractorsInput.value, 10);
         let randomDistractors = parseInt(randomDistractorsInput.value, 10);
         let speed = parseFloat(speedInput.value);
         let delayTime = parseFloat(delayInput.value) * 1000;  // Convert to milliseconds
@@ -260,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
             level = parseInt(levelInput.value, 10);
             timeLeft = parseInt(timerInput.value, 10);
             selectTime = parseFloat(selectTimeInput.value) * 1000;
-            blueDistractors = parseInt(blueDistractorsInput.value, 10);
             randomDistractors = parseInt(randomDistractorsInput.value, 10);
             speed = parseFloat(speedInput.value);
             delayTime = parseFloat(delayInput.value) * 1000;
@@ -282,13 +274,11 @@ document.addEventListener('DOMContentLoaded', () => {
         function fullResetGame() {
             console.log("Full game reset");
             clearTimeout(selectionTimeout);
-            clearTimeout(delayTimeout);
             clearInterval(interval);
             clearInterval(animationInterval);
             clearInterval(flashInterval);
             clearInterval(timer);
             resetGame();
-            delayMessage.style.display = 'none';  // Hide delay message
             circles.forEach(circle => {
                 const newCircle = circle.cloneNode(true);
                 circle.replaceWith(newCircle);
@@ -308,8 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function createCircles() {
             console.log("Creating circles");
-            const totalBlueBalls = level + blueDistractors; // Level balls + blue distractors
-            const totalCircles = totalBlueBalls + randomDistractors;
+            const totalCircles = level + randomDistractors;
 
             // Create circles
             for (let i = 0; i < totalCircles; i++) {
@@ -318,10 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (i < level) {
                     // Game balls
-                } else if (i < totalBlueBalls) {
-                    // Blue distractors
-                    circle.classList.add('distractor');
-                    circle.style.backgroundColor = 'blue';
                 } else {
                     // Random colored distractors
                     circle.classList.add('distractor');
@@ -331,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 circles.push(circle);
             }
 
-            // Shuffle circles to mix blue and distractors
+            // Shuffle circles to mix distractors
             shuffleArray(circles);
 
             // Add circles to the container
@@ -463,11 +448,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (distance < 30) {
                                     const angle = Math.atan2(dy, dx);
                                     const speed1 = Math.sqrt(velocities[index].x * velocities.indexOf('x') + velocities[index].y * velocities[index].y);
-                                    const speed2 = Math.sqrt(velocities[j].x * velocities[j].x + velocities[j].y * velocities[j].y);
+                                    const speed2 = Math.sqrt(velocities[j].x * velocities[j].x + velocities[j].y * velocities.j.y);
                                     velocities[index].x = speed2 * Math.cos(angle);
                                     velocities[index].y = speed2 * Math.sin(angle);
                                     velocities[j].x = speed1 * Math.cos(angle + Math.PI);
-                                    velocities[j].y = speed1 * Math.sin(angle + Math.PI);
+                                    velocities.j.y = speed1 * Math.sin(angle + Math.PI);
                                 }
                             }
                         }
@@ -494,7 +479,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (selected < level) {
                     let index;
-                    let distractorIndex;
                     do {
                         index = Math.floor(Math.random() * circles.length);  // Select from all circles
                     } while (sequence.includes(index) || circles[index].classList.contains('distractor'));
@@ -503,37 +487,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     displayedNumbers.push(numbers[selected]); // Store the displayed number
                     sequence.push(index);
 
-                    if (blueDistractors > 0 || randomDistractors > 0) {
-                        do {
-                            distractorIndex = Math.floor(Math.random() * circles.length);  // Select from all circles
-                        } while (distractorIndex === index || !circles[distractorIndex].classList.contains('distractor') || sequence.includes(distractorIndex));
-                        circles[distractorIndex].style.backgroundColor = 'red'; // Fake red selection for distractor
-                        setTimeout(() => {
-                            circles[distractorIndex].style.backgroundColor = 'blue'; // Revert back to blue
-                        }, selectTime);
-                    }
-
                     selected++;
                     setTimeout(selectNext, selectTime);
                 } else {
-                    delayMessage.style.display = 'block';  // Show delay message
-
-                    delayTimeout = setTimeout(() => {
-                        clearInterval(animationInterval); // Stop circles from moving
-                        if (flashMode) {
-                            clearInterval(flashInterval);
-                            circles.forEach(circle => {
-                                circle.style.visibility = 'visible';
-                            });
-                        }
-                        circles.forEach(circle => circle.style.transition = 'none'); // Stop circles from moving
-
-                        delayMessage.style.display = 'none';  // Hide delay message
-                        startTimer();
-                        circles.forEach((circle, idx) => {
-                            circle.addEventListener('click', () => selectCircle(idx));
+                    clearInterval(animationInterval); // Stop circles from moving
+                    if (flashMode) {
+                        clearInterval(flashInterval);
+                        circles.forEach(circle => {
+                            circle.style.visibility = 'visible';
                         });
-                    }, delayTime);
+                    }
+                    circles.forEach(circle => circle.style.transition = 'none'); // Stop circles from moving
+
+                    startTimer();
+                    circles.forEach((circle, idx) => {
+                        circle.addEventListener('click', () => selectCircle(idx));
+                    });
                 }
             };
             selectNext();
@@ -713,10 +682,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function updateSelectTime() {
             selectTime = parseFloat(selectTimeInput.value) * 1000;
-        }
-
-        function updateBlueDistractors() {
-            blueDistractors = parseInt(blueDistractorsInput.value, 10);
         }
 
         function updateRandomDistractors() {

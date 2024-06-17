@@ -232,15 +232,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let randomDistractors = parseInt(randomDistractorsInput.value, 10);
         let speed = parseFloat(speedInput.value);
         let delayTime = parseFloat(delayInput.value) * 1000;  // Convert to milliseconds
-        let backwardsMode = false;  // Backwards mode flag
+        let spanMode = 'forwards'; // 'forwards', 'backwards', 'sequencing'
         let randomMode = false;  // Random mode flag
         let rotationMode = 0;  // Rotation mode states: 0 - Normal, 1 - Rotation, 2 - Combination
         let flashMode = false;  // Flash mode flag
-        let nonConsecutiveMode = false; // Non-consecutive mode flag
+        let consecutiveMode = true; // Consecutive mode flag
         let autoProgression = true; // Automatic level progression flag
         let showAnswers = true; // Show answers flag
         let distractorColors = ['orange', 'pink', 'purple', 'brown', 'cyan', 'gray'];
         let levelHistory = [];  // Track the levels the player has been on
+        let velocities = []; // Velocity array for circles
 
         if (startBtn) {
             startBtn.addEventListener('click', startGame);
@@ -256,6 +257,14 @@ document.addEventListener('DOMContentLoaded', () => {
             randomDistractors = parseInt(randomDistractorsInput.value, 10);
             speed = parseFloat(speedInput.value);
             delayTime = parseFloat(delayInput.value) * 1000;
+            spanMode = document.getElementById('forwards-btn').checked ? 'forwards' :
+                document.getElementById('backwards-btn').checked ? 'backwards' : 'sequencing';
+            randomMode = document.getElementById('normal-btn').checked;
+            rotationMode = document.getElementById('rotation-btn').checked ? 1 : 0;
+            flashMode = document.getElementById('flash-btn').textContent.includes('On');
+            consecutiveMode = document.getElementById('consecutive-btn').textContent.includes('On');
+            autoProgression = document.getElementById('progression-btn').textContent.includes('On');
+            showAnswers = document.getElementById('show-answers-btn').textContent.includes('On');
             fullResetGame();
             createCircles();
             if (rotationMode === 1) {
@@ -283,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newCircle = circle.cloneNode(true);
                 circle.replaceWith(newCircle);
             });
+            velocities = [];
         }
 
         function resetGame() {
@@ -341,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function animateCircles() {
             console.log("Animating circles");
-            const velocities = circles.map(() => ({
+            velocities = circles.map(() => ({
                 x: (Math.random() * 2 - 1) * speed,
                 y: (Math.random() * 2 - 1) * speed
             }));
@@ -415,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const speeds = Array.from({ length: groups }, () => speed * (Math.random() * 1 + 0.5));  // Random speed between 50-150% of the speed
             const directions = Array.from({ length: groups }, () => Math.random() < 0.5 ? 1 : -1);  // Random directions for each group
             const halfCircles = Math.floor(circles.length / 2);
-            const velocities = circles.map(() => ({
+            velocities = circles.map(() => ({
                 x: (Math.random() * 2 - 1) * speed,
                 y: (Math.random() * 2 - 1) * speed
             }));
@@ -447,12 +457,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const distance = Math.sqrt(dx * dx + dy * dy);
                                 if (distance < 30) {
                                     const angle = Math.atan2(dy, dx);
-                                    const speed1 = Math.sqrt(velocities[index].x * velocities.indexOf('x') + velocities[index].y * velocities[index].y);
-                                    const speed2 = Math.sqrt(velocities[j].x * velocities[j].x + velocities[j].y * velocities.j.y);
+                                    const speed1 = Math.sqrt(velocities[index].x * velocities[index].x + velocities[index].y * velocities[index].y);
+                                    const speed2 = Math.sqrt(velocities[j].x * velocities[j].x + velocities[j].y * velocities[j].y);
                                     velocities[index].x = speed2 * Math.cos(angle);
-                                    velocities[index].y = speed2 * Math.sin(angle);
+                                    velocities.index.y = speed2 * Math.sin(angle);
                                     velocities[j].x = speed1 * Math.cos(angle + Math.PI);
-                                    velocities.j.y = speed1 * Math.sin(angle + Math.PI);
+                                    velocities[j].y = speed1 * Math.sin(angle + Math.PI);
                                 }
                             }
                         }
@@ -468,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function selectCircles() {
             console.log("Selecting circles");
             let selected = 0;
-            const numbers = nonConsecutiveMode ? generateNonConsecutiveNumbers(level) : Array.from({ length: level }, (_, i) => i + 1); // Generate non-consecutive or consecutive numbers
+            const numbers = consecutiveMode ? Array.from({ length: level }, (_, i) => i + 1) : generateNonConsecutiveNumbers(level); // Generate consecutive or non-consecutive numbers
             if (randomMode) {
                 shuffleArray(numbers);
             }
@@ -535,11 +545,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (randomMode) {
                 // Create the correct sequence based on numbers displayed on circles
                 correctSequence = sequence.slice().sort((a, b) => displayedNumbers[sequence.indexOf(a)] - displayedNumbers[sequence.indexOf(b)]);
-                if (backwardsMode) {
+                if (spanMode === 'backwards') {
                     correctSequence.reverse();
                 }
             } else {
-                correctSequence = backwardsMode ? sequence.slice().reverse() : sequence;
+                correctSequence = sequence;
+                if (spanMode === 'backwards') {
+                    correctSequence = sequence.slice().reverse();
+                }
             }
             for (let i = 0; i < correctSequence.length; i++) {
                 if (userSequence[i] !== correctSequence[i]) {
@@ -617,29 +630,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function toggleBackwardsMode() {
-            backwardsMode = !backwardsMode;
-            backwardsBtn.textContent = backwardsMode ? 'Normal Mode' : 'Backwards Mode';
-            console.log(`Backwards mode: ${backwardsMode}`);
+            spanMode = 'backwards';
+            document.getElementById('backwards-btn').textContent = 'Normal Mode';
+            console.log(`Backwards mode: ${spanMode}`);
         }
 
         function toggleRandomMode() {
             randomMode = !randomMode;
-            randomBtn.textContent = randomMode ? 'Normal Mode' : 'Random Mode';
+            document.getElementById('random-btn').textContent = randomMode ? 'Normal Mode' : 'Random Mode';
             console.log(`Random mode: ${randomMode}`);
         }
 
         function toggleRotationMode() {
             rotationMode = (rotationMode + 1) % 3;
             if (rotationMode === 0) {
-                rotationBtn.textContent = 'Normal Mode';
+                document.getElementById('rotation-btn').textContent = 'Normal Mode';
                 rotationGroupsInput.style.display = 'none'; // Hide rotation groups input
                 rotationGroupsInput.previousElementSibling.style.display = 'none'; // Hide the label for rotation groups input
             } else if (rotationMode === 1) {
-                rotationBtn.textContent = 'Rotation Mode';
+                document.getElementById('rotation-btn').textContent = 'Rotation Mode';
                 rotationGroupsInput.style.display = 'block'; // Show rotation groups input
                 rotationGroupsInput.previousElementSibling.style.display = 'block'; // Show the label for rotation groups input
             } else {
-                rotationBtn.textContent = 'Combination Mode';
+                document.getElementById('rotation-btn').textContent = 'Combination Mode';
                 rotationGroupsInput.style.display = 'block'; // Show rotation groups input
                 rotationGroupsInput.previousElementSibling.style.display = 'block'; // Show the label for rotation groups input
             }
@@ -648,25 +661,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function toggleFlashMode() {
             flashMode = !flashMode;
-            flashBtn.textContent = flashMode ? 'Normal Mode' : 'Flash Mode';
+            document.getElementById('flash-btn').textContent = flashMode ? 'Normal Mode' : 'Flash Mode';
             console.log(`Flash mode: ${flashMode}`);
         }
 
         function toggleNonConsecutiveMode() {
-            nonConsecutiveMode = !nonConsecutiveMode;
-            nonConsecutiveBtn.textContent = nonConsecutiveMode ? 'Consecutive Mode' : 'Non-Consecutive Mode';
-            console.log(`Non-consecutive mode: ${nonConsecutiveMode}`);
+            consecutiveMode = !consecutiveMode;
+            document.getElementById('non-consecutive-btn').textContent = consecutiveMode ? 'Consecutive Mode' : 'Non-Consecutive Mode';
+            console.log(`Consecutive mode: ${consecutiveMode}`);
         }
 
         function toggleAutoProgression() {
             autoProgression = !autoProgression;
-            progressionBtn.textContent = autoProgression ? 'Auto Progression: On' : 'Auto Progression: Off';
+            document.getElementById('progression-btn').textContent = autoProgression ? 'Auto Progression: On' : 'Auto Progression: Off';
             console.log(`Auto progression: ${autoProgression}`);
         }
 
         function toggleShowAnswers() {
             showAnswers = !showAnswers;
-            showAnswersBtn.textContent = showAnswers ? 'Show Answers: On' : 'Show Answers: Off';
+            document.getElementById('show-answers-btn').textContent = showAnswers ? 'Show Answers: On' : 'Show Answers: Off';
             console.log(`Show answers: ${showAnswers}`);
         }
 

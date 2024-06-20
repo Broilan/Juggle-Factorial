@@ -98,15 +98,28 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding: 10px;
+    padding-left: 10px;
     font-weight: bold;
 }
 
+.input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.input label {
+    margin-bottom: 5px;
+    margin-right: auto;
+}
+
 .input input {
-    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
+    text-align: center;
     width: 100%;
 }
 

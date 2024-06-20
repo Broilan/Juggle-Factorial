@@ -286,6 +286,12 @@ document.addEventListener('DOMContentLoaded', () => {
             flashMode = document.getElementById('flash-btn').textContent.includes('On');
             autoProgression = document.getElementById('progression-btn').textContent.includes('On');
             showAnswers = document.getElementById('show-answers-btn').textContent.includes('On');
+
+            // Change start button to stop button
+            startBtn.textContent = 'Stop';
+            startBtn.style.backgroundColor = 'red';
+            startBtn.onclick = () => location.reload();
+
             fullResetGame();
             createCircles();
             if (rotationMode === 1) {
@@ -464,11 +470,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         let left = parseFloat(circle.style.left);
                         let top = parseFloat(circle.style.top);
                         left += velocities[index].x;
-                        top += velocities[index].y;
+                        top += velocities.index.y;
 
                         // Bounce off walls
                         if (left <= 0 || left >= 300) velocities[index].x *= -1;
-                        if (top <= 0 || top >= 300) velocities[index].y *= -1;
+                        if (top <= 0 || top >= 300) velocities.index.y *= -1;
 
                         // Bounce off other circles
                         for (let j = 0; j < circles.length; j++) {
@@ -478,10 +484,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const distance = Math.sqrt(dx * dx + dy * dy);
                                 if (distance < 30) {
                                     const angle = Math.atan2(dy, dx);
-                                    const speed1 = Math.sqrt(velocities[index].x * velocities[index].x + velocities[index].y * velocities[index].y);
-                                    const speed2 = Math.sqrt(velocities[j].x * velocities[j].x + velocities[j].y * velocities[j].y);
+                                    const speed1 = Math.sqrt(velocities[index].x * velocities.index.x + velocities.index.y * velocities.index.y);
+                                    const speed2 = Math.sqrt(velocities[j].x * velocities.j.x + velocities.j.y * velocities.j.y);
                                     velocities[index].x = speed2 * Math.cos(angle);
-                                    velocities[index].y = speed2 * Math.sin(angle);
+                                    velocities.index.y = speed2 * Math.sin(angle);
                                     velocities[j].x = speed1 * Math.cos(angle + Math.PI);
                                     velocities[j].y = speed1 * Math.sin(angle + Math.PI);
                                 }
@@ -640,85 +646,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     startGame();
                 }
             }, 1000);
-        }
-
-        function toggleBackwardsMode() {
-            spanModes.backwards = !spanModes.backwards;
-            document.getElementById('backwards-btn').textContent = spanModes.backwards ? 'Normal Mode' : 'Backwards Mode';
-            console.log(`Backwards mode: ${spanModes.backwards}`);
-        }
-
-        function toggleRandomMode() {
-            randomMode = !randomMode;
-            document.getElementById('random-btn').textContent = randomMode ? 'Normal Mode' : 'Random Mode';
-            console.log(`Random mode: ${randomMode}`);
-        }
-
-        function toggleRotationMode() {
-            rotationMode = (rotationMode + 1) % 3;
-            if (rotationMode === 0) {
-                document.getElementById('rotation-btn').textContent = 'Normal Mode';
-                rotationGroupsInput.style.display = 'none'; // Hide rotation groups input
-                rotationGroupsInput.previousElementSibling.style.display = 'none'; // Hide the label for rotation groups input
-            } else if (rotationMode === 1) {
-                document.getElementById('rotation-btn').textContent = 'Rotation Mode';
-                rotationGroupsInput.style.display = 'block'; // Show rotation groups input
-                rotationGroupsInput.previousElementSibling.style.display = 'block'; // Show the label for rotation groups input
-            } else {
-                document.getElementById('rotation-btn').textContent = 'Combination Mode';
-                rotationGroupsInput.style.display = 'block'; // Show rotation groups input
-                rotationGroupsInput.previousElementSibling.style.display = 'block'; // Show the label for rotation groups input
-            }
-            console.log(`Rotation mode: ${rotationMode}`);
-        }
-
-        function toggleFlashMode() {
-            flashMode = !flashMode;
-            document.getElementById('flash-btn').textContent = flashMode ? 'Normal Mode' : 'Flash Mode';
-            console.log(`Flash mode: ${flashMode}`);
-        }
-
-        function toggleAutoProgression() {
-            autoProgression = !autoProgression;
-            document.getElementById('progression-btn').textContent = autoProgression ? 'Auto Progression: On' : 'Auto Progression: Off';
-            console.log(`Auto progression: ${autoProgression}`);
-        }
-
-        function toggleShowAnswers() {
-            showAnswers = !showAnswers;
-            document.getElementById('show-answers-btn').textContent = showAnswers ? 'Show Answers: On' : 'Show Answers: Off';
-            console.log(`Show answers: ${showAnswers}`);
-        }
-
-        function updateLevel() {
-            level = parseInt(levelInput.value, 10);
-            levelDisplay.textContent = `Level: ${level}`;
-        }
-
-        function updateTimer() {
-            timeLeft = parseInt(timerInput.value, 10);
-            timerDisplay.textContent = `Timer: ${timeLeft}s`;
-        }
-
-        function updateSelectTime() {
-            selectTime = parseFloat(selectTimeInput.value) * 1000;
-        }
-
-        function updateRandomDistractors() {
-            randomDistractors = parseInt(randomDistractorsInput.value, 10);
-        }
-
-        function updateSpeed() {
-            speed = parseFloat(speedInput.value);
-        }
-
-        function updateDelayTime() {
-            delayTime = parseFloat(delayInput.value) * 1000;
-        }
-
-        function updateRotationGroups() {
-            const groups = parseInt(rotationGroupsInput.value, 10);
-            rotationGroupsInput.value = Math.max(1, Math.min(groups, 4)); // Ensure value is between 1 and 4
         }
 
         function updateAverageLevel() {

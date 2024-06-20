@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-
     function loadModal() {
         fetch('../Settings/settings-modal.html')
             .then(response => response.text())
@@ -216,7 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeGame() {
         console.log("Initializing game");
 
-        const circleContainer = document.getElementById('circle-container');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
         const startBtn = document.getElementById('start-btn');
         const levelDisplay = document.getElementById('level-display');
         const timerDisplay = document.getElementById('timer-display');
@@ -329,13 +329,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function resetGame() {
             console.log("Game reset");
-            circles.forEach(circle => circle.remove());
             circles = [];
             sequence = [];
             displayedNumbers = [];
             userSequence = [];
             timerDisplay.textContent = `Timer: ${timeLeft}s`;
             levelDisplay.textContent = `Level: ${level}`;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
         function createCircles() {
@@ -344,167 +344,198 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Create circles
             for (let i = 0; i < totalCircles; i++) {
-                const circle = document.createElement('div');
-                circle.classList.add('circle');
+                const circle = {
+                    x: Math.random() * (canvas.width - 30),
+                    y: Math.random() * (canvas.height - 30 - 40) + 40, // Adjusted for info height
+                    radius: 15,
+                    color: 'blue',
+                    isDistractor: i >= level,
+                    number: null,
+                    velocity: {
+                        x: (Math.random() * 2 - 1) * speed,
+                        y: (Math.random() * 2 - 1) * speed
+                    }
+                };
 
-                if (i < level) {
-                    // Game balls
-                } else {
-                    // Random colored distractors
-                    circle.classList.add('distractor');
-                    circle.style.setProperty('--color', distractorColors[i % distractorColors.length]);
+                if (circle.isDistractor) {
+                    circle.color = distractorColors[i % distractorColors.length];
                 }
 
                 circles.push(circle);
             }
 
-            // Shuffle circles to mix distractors
-            shuffleArray(circles);
-
-            // Add circles to the container
-            circles.forEach(circle => {
-                circle.style.left = `${Math.random() * 300}px`;
-                circle.style.top = `${Math.random() * 300}px`;
-                circleContainer.appendChild(circle);
-            });
-
             if (rotationMode === 1) {
-                const radius = 150;
-                const centerX = 300;
-                const centerY = 300;
+                const radius = canvas.width / 2.5;
+                const centerX = canvas.width / 2;
+                const centerY = (canvas.height - 40) / 2 + 40; // Adjusted for info height
                 const angleStep = (2 * Math.PI) / circles.length;
                 circles.forEach((circle, index) => {
                     const angle = index * angleStep;
-                    circle.style.left = `${centerX + radius * Math.cos(angle) - 15}px`;
-                    circle.style.top = `${centerY + radius * Math.sin(angle) - 15}px`;
+                    circle.x = centerX + radius * Math.cos(angle);
+                    circle.y = centerY + radius * Math.sin(angle);
                 });
             }
         }
 
         function animateCircles() {
             console.log("Animating circles");
-            velocities = circles.map(() => ({
-                x: (Math.random() * 2 - 1) * speed,
-                y: (Math.random() * 2 - 1) * speed
-            }));
-            animationInterval = setInterval(() => {
-                circles.forEach((circle, i) => {
-                    let left = parseFloat(circle.style.left);
-                    let top = parseFloat(circle.style.top);
-                    left += velocities[i].x;
-                    top += velocities[i].y;
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                circles.forEach(circle => {
+                    ctx.beginPath();
+                    ctx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
+                    ctx.fillStyle = circle.color;
+                    ctx.fill();
+                    if (circle.number !== null) {
+                        ctx.fillStyle = 'white';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(circle.number, circle.x, circle.y);
+                    }
+                    ctx.closePath();
+
+                    circle.x += circle.velocity.x;
+                    circle.y += circle.velocity.y;
 
                     // Bounce off walls
-                    if (left <= 0 || left >= 300) velocities[i].x *= -1;
-                    if (top <= 0 || top >= 300) velocities[i].y *= -1;
-
-                    // Bounce off other circles
-                    for (let j = 0; j < circles.length; j++) {
-                        if (i !== j) {
-                            const dx = left - parseFloat(circles[j].style.left);
-                            const dy = top - parseFloat(circles[j].style.top);
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            if (distance < 30) {
-                                const angle = Math.atan2(dy, dx);
-                                const speed1 = Math.sqrt(velocities[i].x * velocities[i].x + velocities[i].y * velocities[i].y);
-                                const speed2 = Math.sqrt(velocities[j].x * velocities[j].x + velocities[j].y * velocities[j].y);
-                                velocities[i].x = speed2 * Math.cos(angle);
-                                velocities[i].y = speed2 * Math.sin(angle);
-                                velocities[j].x = speed1 * Math.cos(angle + Math.PI);
-                                velocities[j].y = speed1 * Math.sin(angle + Math.PI);
-                            }
-                        }
+                    if (circle.x - circle.radius <= 0 || circle.x + circle.radius >= canvas.width) {
+                        circle.velocity.x *= -1;
+                    }
+                    if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height) { // Adjusted for info height
+                        circle.velocity.y *= -1;
                     }
 
-                    circle.style.left = `${left}px`;
-                    circle.style.top = `${top}px`;
+                    // Bounce off other circles
+                    circles.forEach(otherCircle => {
+                        if (circle !== otherCircle) {
+                            const dx = circle.x - otherCircle.x;
+                            const dy = circle.y - otherCircle.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            if (distance < circle.radius + otherCircle.radius) {
+                                const angle = Math.atan2(dy, dx);
+                                const speed1 = Math.sqrt(circle.velocity.x * circle.velocity.x + circle.velocity.y * circle.velocity.y);
+                                const speed2 = Math.sqrt(otherCircle.velocity.x * otherCircle.velocity.x + otherCircle.velocity.y * otherCircle.velocity.y);
+                                circle.velocity.x = speed2 * Math.cos(angle);
+                                circle.velocity.y = speed2 * Math.sin(angle);
+                                otherCircle.velocity.x = speed1 * Math.cos(angle + Math.PI);
+                                otherCircle.velocity.y = speed1 * Math.sin(angle + Math.PI);
+                            }
+                        }
+                    });
                 });
-            }, 20);
+                animationInterval = requestAnimationFrame(draw);
+            }
+            draw();
         }
 
         function animateCirclesInRotation() {
             console.log("Animating circles in rotation");
-            const radius = 70;
-            const centerX = 170;
-            const centerY = 160;
+            const radius = canvas.width / 2.5;
+            const centerX = canvas.width / 2;
+            const centerY = (canvas.height - 40) / 2 + 40; // Adjusted for info height
             const groups = parseInt(rotationGroupsInput.value, 10);
-            const groupRadiusIncrement = 25;  // Increment radius for each group
+            const groupRadiusIncrement = canvas.width / 20;  // Increment radius for each group
             let angleOffsets = Array(groups).fill(0);
             const speeds = Array.from({ length: groups }, () => speed * (Math.random() * 1 + 0.5));  // Random speed between 50-150% of the speed
             const directions = Array.from({ length: groups }, () => Math.random() < 0.5 ? 1 : -1);  // Random directions for each group
 
-            animationInterval = setInterval(() => {
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 circles.forEach((circle, index) => {
                     const group = index % groups;
                     const groupRadius = radius + group * groupRadiusIncrement;
                     const angleStep = (2 * Math.PI) / Math.ceil(circles.length / groups);
                     const angle = angleOffsets[group] * directions[group] + (index / groups) * angleStep;
-                    circle.style.left = `${centerX + groupRadius * Math.cos(angle) - 15}px`;
-                    circle.style.top = `${centerY + groupRadius * Math.sin(angle) - 15}px`;
+                    circle.x = centerX + groupRadius * Math.cos(angle);
+                    circle.y = centerY + groupRadius * Math.sin(angle);
+
+                    ctx.beginPath();
+                    ctx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
+                    ctx.fillStyle = circle.color;
+                    ctx.fill();
+                    if (circle.number !== null) {
+                        ctx.fillStyle = 'white';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(circle.number, circle.x, circle.y);
+                    }
+                    ctx.closePath();
                 });
                 angleOffsets = angleOffsets.map((offset, group) => offset + speeds[group] * 0.01);
-            }, 20);
+                animationInterval = requestAnimationFrame(draw);
+            }
+            draw();
         }
 
         function animateCirclesInCombination() {
             console.log("Animating circles in combination");
-            const radius = 60;
-            const centerX = 170;
-            const centerY = 160;
+            const radius = canvas.width / 2.5;
+            const centerX = canvas.width / 2;
+            const centerY = (canvas.height - 40) / 2 + 40; // Adjusted for info height
             const groups = parseInt(rotationGroupsInput.value, 10);
-            const groupRadiusIncrement = 25;  // Increment radius for each group
+            const groupRadiusIncrement = canvas.width / 20;  // Increment radius for each group
             let angleOffsets = Array(groups).fill(0);
             const speeds = Array.from({ length: groups }, () => speed * (Math.random() * 1 + 0.5));  // Random speed between 50-150% of the speed
             const directions = Array.from({ length: groups }, () => Math.random() < 0.5 ? 1 : -1);  // Random directions for each group
             const halfCircles = Math.floor(circles.length / 2);
-            velocities = circles.map(() => ({
-                x: (Math.random() * 2 - 1) * speed,
-                y: (Math.random() * 2 - 1) * speed
-            }));
 
-            animationInterval = setInterval(() => {
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 circles.forEach((circle, index) => {
                     if (index < halfCircles) {
                         const group = index % groups;
                         const groupRadius = radius + group * groupRadiusIncrement;
                         const angleStep = (2 * Math.PI) / Math.ceil(halfCircles / groups);
                         const angle = angleOffsets[group] * directions[group] + (index / groups) * angleStep;
-                        circle.style.left = `${centerX + groupRadius * Math.cos(angle) - 15}px`;
-                        circle.style.top = `${centerY + groupRadius * Math.sin(angle) - 15}px`;
+                        circle.x = centerX + groupRadius * Math.cos(angle);
+                        circle.y = centerY + groupRadius * Math.sin(angle);
                     } else {
-                        let left = parseFloat(circle.style.left);
-                        let top = parseFloat(circle.style.top);
-                        left += velocities[index].x;
-                        top += velocities.index.y;
+                        circle.x += circle.velocity.x;
+                        circle.y += circle.velocity.y;
 
                         // Bounce off walls
-                        if (left <= 0 || left >= 300) velocities[index].x *= -1;
-                        if (top <= 0 || top >= 300) velocities.index.y *= -1;
-
-                        // Bounce off other circles
-                        for (let j = 0; j < circles.length; j++) {
-                            if (index !== j) {
-                                const dx = left - parseFloat(circles[j].style.left);
-                                const dy = top - parseFloat(circles[j].style.top);
-                                const distance = Math.sqrt(dx * dx + dy * dy);
-                                if (distance < 30) {
-                                    const angle = Math.atan2(dy, dx);
-                                    const speed1 = Math.sqrt(velocities[index].x * velocities.index.x + velocities.index.y * velocities.index.y);
-                                    const speed2 = Math.sqrt(velocities[j].x * velocities.j.x + velocities.j.y * velocities.j.y);
-                                    velocities[index].x = speed2 * Math.cos(angle);
-                                    velocities.index.y = speed2 * Math.sin(angle);
-                                    velocities[j].x = speed1 * Math.cos(angle + Math.PI);
-                                    velocities.j.y = speed1 * Math.sin(angle + Math.PI);
-                                }
-                            }
+                        if (circle.x - circle.radius <= 0 || circle.x + circle.radius >= canvas.width) {
+                            circle.velocity.x *= -1;
+                        }
+                        if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height) { // Adjusted for info height
+                            circle.velocity.y *= -1;
                         }
 
-                        circle.style.left = `${left}px`;
-                        circle.style.top = `${top}px`;
+                        // Bounce off other circles
+                        circles.forEach(otherCircle => {
+                            if (circle !== otherCircle) {
+                                const dx = circle.x - otherCircle.x;
+                                const dy = circle.y - otherCircle.y;
+                                const distance = Math.sqrt(dx * dx + dy * dy);
+                                if (distance < circle.radius + otherCircle.radius) {
+                                    const angle = Math.atan2(dy, dx);
+                                    const speed1 = Math.sqrt(circle.velocity.x * circle.velocity.x + circle.velocity.y * circle.velocity.y);
+                                    const speed2 = Math.sqrt(otherCircle.velocity.x * otherCircle.velocity.x + otherCircle.velocity.y * otherCircle.velocity.y);
+                                    circle.velocity.x = speed2 * Math.cos(angle);
+                                    circle.velocity.y = speed2 * Math.sin(angle);
+                                    otherCircle.velocity.x = speed1 * Math.cos(angle + Math.PI);
+                                    otherCircle.velocity.y = speed1 * Math.sin(angle + Math.PI);
+                                }
+                            }
+                        });
                     }
+
+                    ctx.beginPath();
+                    ctx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
+                    ctx.fillStyle = circle.color;
+                    ctx.fill();
+                    if (circle.number !== null) {
+                        ctx.fillStyle = 'white';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(circle.number, circle.x, circle.y);
+                    }
+                    ctx.closePath();
                 });
                 angleOffsets = angleOffsets.map((offset, group) => offset + speeds[group] * 0.01);
-            }, 20);
+                animationInterval = requestAnimationFrame(draw);
+            }
+            draw();
         }
 
         function selectCircles() {
@@ -516,44 +547,58 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const selectNext = () => {
                 if (selected > 0) {
-                    circles[sequence[selected - 1]].textContent = '';
-                    circles[sequence[selected - 1]].style.backgroundColor = 'blue';
+                    const previousCircle = circles[sequence[selected - 1]];
+                    previousCircle.number = null;
+                    previousCircle.color = 'blue';
                 }
                 if (selected < level) {
                     let index;
                     do {
                         index = Math.floor(Math.random() * circles.length);  // Select from all circles
-                    } while (sequence.includes(index) || circles[index].classList.contains('distractor'));
-                    circles[index].style.backgroundColor = 'red';
-                    circles[index].textContent = numbers[selected];
+                    } while (sequence.includes(index) || circles[index].isDistractor);
+                    circles[index].color = 'red';
+                    circles[index].number = numbers[selected];
                     displayedNumbers.push(numbers[selected]); // Store the displayed number
                     sequence.push(index);
 
                     selected++;
                     setTimeout(selectNext, selectTime);
                 } else {
-                    clearInterval(animationInterval); // Stop circles from moving
+                    cancelAnimationFrame(animationInterval); // Stop circles from moving
                     if (flashMode) {
                         clearInterval(flashInterval);
                         circles.forEach(circle => {
-                            circle.style.visibility = 'visible';
+                            circle.visible = true;
                         });
                     }
-                    circles.forEach(circle => circle.style.transition = 'none'); // Stop circles from moving
+                    circles.forEach(circle => circle.velocity = { x: 0, y: 0 }); // Stop circles from moving
 
                     startTimer();
-                    circles.forEach((circle, idx) => {
-                        circle.addEventListener('click', () => selectCircle(idx));
-                    });
+                    canvas.addEventListener('click', handleCanvasClick);
                 }
             };
             selectNext();
         }
 
+        function handleCanvasClick(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            circles.forEach((circle, index) => {
+                const dx = x - circle.x;
+                const dy = y - circle.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < circle.radius && !userSequence.includes(index)) {
+                    selectCircle(index);
+                }
+            });
+        }
+
         function selectCircle(index) {
             console.log("Circle selected:", index);
             if (userSequence.includes(index)) return;
-            circles[index].style.backgroundColor = 'yellow';
+            circles[index].color = 'yellow';
             userSequence.push(index);
             if (userSequence.length === sequence.length) {
                 checkSequence();
@@ -622,13 +667,13 @@ document.addEventListener('DOMContentLoaded', () => {
         function showCorrectSequence(callback) {
             console.log("Showing correct sequence");
             sequence.forEach((index, i) => {
-                circles[index].textContent = displayedNumbers[i];
-                circles[index].style.backgroundColor = 'green';
+                circles[index].number = displayedNumbers[i];
+                circles[index].color = 'green';
             });
             setTimeout(() => {
                 sequence.forEach(index => {
-                    circles[index].textContent = '';
-                    circles[index].style.backgroundColor = 'blue';
+                    circles[index].number = null;
+                    circles[index].color = 'blue';
                 });
                 callback();
             }, 3000); // Show the correct sequence for 3 seconds
@@ -675,20 +720,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 circlesToFlash.forEach(index => {
                     const circle = circles[index];
-                    const originalColor = circle.style.backgroundColor;
-                    const originalLeft = circle.style.left;
-                    const originalTop = circle.style.top;
+                    const originalColor = circle.color;
 
-                    circle.style.visibility = 'hidden';
-
-                    if (!rotationMode) {
-                        // Freeze the circle in place
-                        circle.style.left = originalLeft;
-                        circle.style.top = originalTop;
-                    }
+                    circle.color = 'transparent';
 
                     setTimeout(() => {
-                        circle.style.visibility = 'visible';
+                        circle.color = originalColor;
                     }, 500);  // Make the circle visible again after 500ms
                 });
             }, 2000);  // Repeat the process every 2 seconds
@@ -700,7 +737,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
-
     }
 
     // Load the modal when the page loads

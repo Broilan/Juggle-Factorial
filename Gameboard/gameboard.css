@@ -5,8 +5,8 @@ body {
     font-family: Arial, sans-serif;
     background-color: #e8f0fe;
     margin: 0;
-    overflow: hidden;
     padding: 20px;
+    overflow: hidden;
 }
 
 a {
@@ -17,9 +17,41 @@ a {
 #button-container {
     display: flex;
     align-items: center;
-    gap: 20px;
-    margin-top: 20px;
+    justify-content: center;
+    width: 100%;
+    position: absolute;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    bottom: 0;
+    border-top: 1px solid #000;
+    z-index: 1;
 }
+
+#sub-button-container {
+    flex: column;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 5px;
+    font-size: 1.2rem;
+    margin-left: 5px;
+ }
+
+ #start-btn {
+    background-color: #4CAF50;
+    color: white;
+    font-size: large;
+    padding: 15px 20px;
+    text-align: center;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
 
 .instructions-modal {
     display: none;
@@ -30,9 +62,9 @@ a {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.4);
-  }
-  
-  .instructions-modal-content {
+}
+
+.instructions-modal-content {
     background-color: white;
     padding: 20px;
     border: 1px solid black;
@@ -41,9 +73,9 @@ a {
     height: 500px;
     overflow-y: auto;
     animation: fadeIn 0.5s;
-  }
+}
 
-  /* Hide scrollbar for Webkit browsers */
+/* Hide scrollbar for Webkit browsers */
 .instructions-modal-content::-webkit-scrollbar {
     width: 0;
     height: 0;
@@ -55,21 +87,19 @@ a {
     scrollbar-width: none;  /* Firefox */
 }
 
-  
-  .instructions-close {
+.instructions-close {
     color: #aaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
-  }
-  
-  .instructions-close:hover,
-  .instructions-close:focus {
+}
+
+.instructions-close:hover,
+.instructions-close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
-  }
-  
+}
 
 #settings-scroll {
     display: flex;
@@ -87,11 +117,8 @@ a {
     height: 50px;
     background-color: #f0f0f0;
     border-radius: 10px;
-    margin: 0 auto 20px auto;
-}
-
-.icon-container i {
     font-size: 24px;
+    margin: 0 auto 20px auto;
 }
 
 /* Disable body scroll when modal is open */
@@ -99,84 +126,60 @@ a {
     overflow: hidden;
 }
 
-#gameCanvas {
-    border: 1px solid black;
-    display: block;
-    margin: 20px 0;
-    width: 80%;
-    height: auto;
-    max-width: 600px;
-    max-height: 600px;
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+}
+
+#canvas-container {
+    position: relative;
+    width: 80vw; /* Make it responsive */
+    height: 80vh; /* Make it responsive */
+    max-width: 800px; /* Maximum width */
+    max-height: 800px; /* Maximum height */
+    background-color: #fff;
+    border: 2px solid #000;
+    border-radius: 13px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 i {
     cursor: pointer;
 }
 
-#start-btn {
-    background-color: #4CAF50;
-    color: white;
-    font-size: large;
-    width: 10rem;
-    padding: 15px 20px;
-    text-align: center;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    display: inline-block;
 
-}
-
-#circle-container {
-    position: relative;
-    width: 340px;
-    height: 330px;
-    border: 2px solid #000;
-    background-color: #fff;
-    border-radius: 13px;
-    overflow: hidden;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-.circle {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: blue;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    transition: background-color 0.3s, transform 0.3s;
-}
-.circle:hover {
-    transform: scale(1.1);
-}
-.distractor {
-    background-color: var(--color, blue);
-}
 .header {
-    font-size: 40px;
-    margin-bottom: 40px;
-    padding: 40px 120px;
-    border: 2px solid #555;
-    border-radius: 15px;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-align: center;
 }
+
 .input {
     margin-left: 20px;
     font-size: 14px;
 }
+
 #info {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 800px;
-    margin-top: 20px;
-    font-size: 18px;
-    gap: 10px;
+    height: 5%;
+    border-top-right-radius: 12px;
+    border-top-left-radius: 12px;
+    border: 1px solid #000;
+    background-color: #333;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    font-size: 1rem;
 }
+
 #level-display, #timer-display, #average-level-display {
     background-color: #333;
     color: white;
@@ -185,16 +188,4 @@ i {
     flex: 1;
     text-align: center;
     border: 4px solid #2a2a2a;
-}
-
-.settings-button {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
 }

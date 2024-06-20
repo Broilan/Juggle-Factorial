@@ -11,19 +11,24 @@
 <body>
     <h2 class="header">Jiggle Factorial</h2>
 
-    <div id="circle-container"></div>
-    
-    <div id="button-container">
-        <button id="start-btn">start</button>
-        <i id="infoBtn" class="fas fa-book"></i>  
-        <i id="settingsBtn" class="fas fa-cog"></i>
+    <div id="game-container">
+        <div id="canvas-container">
+            <div id="info">
+                <div id="level-display">Level: 3</div>
+                <div id="timer-display">Timer: 30s</div>
+                <div id="average-level-display">Average Level: 3</div>
+            </div>
+            <canvas id="gameCanvas" width="800" height="800"></canvas>
+            <div id="button-container">
+                <div id="sub-button-container">
+                <i id="infoBtn" class="fas fa-book"></i>  
+                <i id="settingsBtn" class="fas fa-cog"></i>
+                </div>
+                <button id="start-btn">start</button>
+            </div>
+        </div>
     </div>
 
-    <div id="info">
-        <div id="level-display">Level: 3</div>
-        <div id="timer-display">Timer: 30s</div>
-        <div id="average-level-display">Average Level: 3</div>
-    </div>
     <div id="modal-container"></div>
 
     <!-- The Modal -->
@@ -77,10 +82,11 @@
     
         // When the user clicks the button, open the modal 
         infoBtn.onclick = function() {
-        infoModal.style.display = "flex";
-        infoModal.style.justifyContent = "center";
-        infoModal.style.alignItems = "center";
-    }
+            infoModal.style.display = "flex";
+            infoModal.style.justifyContent = "center";
+            infoModal.style.alignItems = "center";
+            document.body.classList.add('no-scroll'); // Disable body scroll
+        }
     
         // When the user clicks on <span> (x), close the modal
         closeSpan.onclick = function() {
@@ -92,8 +98,20 @@
         window.onclick = function(event) {
             if (event.target == infoModal) {
                 infoModal.style.display = "none";
+                document.body.classList.remove('no-scroll'); // Enable body scroll
             }
         }
+
+        // Adjust canvas size
+        function resizeCanvas() {
+            const canvasContainer = document.getElementById('canvas-container');
+            const canvas = document.getElementById('gameCanvas');
+            canvas.width = canvasContainer.clientWidth;
+            canvas.height = canvasContainer.clientHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', resizeCanvas);
     </script>
 </body>
 </html>

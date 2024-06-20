@@ -57,12 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const settings = {
             spanTypes: {
-                forwards: false,
+                forwards: true,
                 backwards: false,
                 sequencing: false
             },
             movementTypes: {
-                normal: false,
+                normal: true,
                 rotation: false
             },
             flashMode: false,
@@ -155,10 +155,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Function to handle movement type checkbox changes
+        function handleMovementTypeChange() {
+            const normalBox = document.getElementById('normal-btn');
+            const rotationBox = document.getElementById('rotation-btn');
+
+            if (!normalBox.checked && !rotationBox.checked) {
+                alert("Please select at least one movement type.");
+                normalBox.checked = true;
+            }
+        }
+
         // Event listeners for span type checkboxes
         document.getElementById('forwards-btn').addEventListener('change', handleSpanTypeChange);
         document.getElementById('backwards-btn').addEventListener('change', handleSpanTypeChange);
         document.getElementById('sequencing-btn').addEventListener('change', handleSpanTypeChange);
+
+        // Event listeners for movement type checkboxes
+        document.getElementById('normal-btn').addEventListener('change', handleMovementTypeChange);
+        document.getElementById('rotation-btn').addEventListener('change', handleMovementTypeChange);
 
         // Event listeners for other settings
         document.getElementById('flash-btn').addEventListener('click', () => {
@@ -224,12 +239,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let randomDistractors = parseInt(randomDistractorsInput.value, 10);
         let speed = parseFloat(speedInput.value);
         let delayTime = parseFloat(delayInput.value) * 1000;  // Convert to milliseconds
-        let spanMode = 'forwards'; // 'forwards', 'backwards', 'sequencing'
-        let randomMode = false;  // Random mode flag
-        let rotationMode = 0;  // Rotation mode states: 0 - Normal, 1 - Rotation, 2 - Combination
-        let flashMode = false;  // Flash mode flag
-        let autoProgression = true; // Automatic level progression flag
-        let showAnswers = true; // Show answers flag
+        let spanModes = {
+            forwards: document.getElementById('forwards-btn').checked,
+            backwards: document.getElementById('backwards-btn').checked,
+            sequencing: document.getElementById('sequencing-btn').checked
+        };
+        let randomMode = document.getElementById('normal-btn').checked;
+        let rotationMode = document.getElementById('rotation-btn').checked ? 1 : 0;
+        let flashMode = document.getElementById('flash-btn').textContent.includes('On');
+        let autoProgression = document.getElementById('progression-btn').textContent.includes('On');
+        let showAnswers = document.getElementById('show-answers-btn').textContent.includes('On');
         let distractorColors = ['orange', 'pink', 'purple', 'brown', 'cyan', 'gray'];
         let levelHistory = [];  // Track the levels the player has been on
         let velocities = []; // Velocity array for circles
@@ -242,14 +261,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function startGame() {
             console.log("Game started");
+            if (!document.getElementById('forwards-btn').checked && !document.getElementById('backwards-btn').checked) {
+                alert("Please select a span type to start the game.");
+                return;
+            }
+            if (!document.getElementById('normal-btn').checked && !document.getElementById('rotation-btn').checked) {
+                alert("Please select at least one movement type.");
+                return;
+            }
+
             level = parseInt(levelInput.value, 10);
             timeLeft = parseInt(timerInput.value, 10);
             selectTime = parseFloat(selectTimeInput.value) * 1000;
             randomDistractors = parseInt(randomDistractorsInput.value, 10);
             speed = parseFloat(speedInput.value);
             delayTime = parseFloat(delayInput.value) * 1000;
-            spanMode = document.getElementById('forwards-btn').checked ? 'forwards' :
-                document.getElementById('backwards-btn').checked ? 'backwards' : 'sequencing';
+            spanModes = {
+                forwards: document.getElementById('forwards-btn').checked,
+                backwards: document.getElementById('backwards-btn').checked,
+                sequencing: document.getElementById('sequencing-btn').checked
+            };
             randomMode = document.getElementById('normal-btn').checked;
             rotationMode = document.getElementById('rotation-btn').checked ? 1 : 0;
             flashMode = document.getElementById('flash-btn').textContent.includes('On');
@@ -433,11 +464,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         let left = parseFloat(circle.style.left);
                         let top = parseFloat(circle.style.top);
                         left += velocities[index].x;
-                        top += velocities.index.y;
+                        top += velocities[index].y;
 
                         // Bounce off walls
                         if (left <= 0 || left >= 300) velocities[index].x *= -1;
-                        if (top <= 0 || top >= 300) velocities.index.y *= -1;
+                        if (top <= 0 || top >= 300) velocities[index].y *= -1;
 
                         // Bounce off other circles
                         for (let j = 0; j < circles.length; j++) {
@@ -447,10 +478,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const distance = Math.sqrt(dx * dx + dy * dy);
                                 if (distance < 30) {
                                     const angle = Math.atan2(dy, dx);
-                                    const speed1 = Math.sqrt(velocities[index].x * velocities.index.x + velocities.index.y * velocities.index.y);
+                                    const speed1 = Math.sqrt(velocities[index].x * velocities[index].x + velocities[index].y * velocities[index].y);
                                     const speed2 = Math.sqrt(velocities[j].x * velocities[j].x + velocities[j].y * velocities[j].y);
                                     velocities[index].x = speed2 * Math.cos(angle);
-                                    velocities.index.y = speed2 * Math.sin(angle);
+                                    velocities[index].y = speed2 * Math.sin(angle);
                                     velocities[j].x = speed1 * Math.cos(angle + Math.PI);
                                     velocities[j].y = speed1 * Math.sin(angle + Math.PI);
                                 }
@@ -468,8 +499,8 @@ document.addEventListener('DOMContentLoaded', () => {
         function selectCircles() {
             console.log("Selecting circles");
             let selected = 0;
-            const numbers = Array.from({ length: level }, (_, i) => i + 1);
-            if (spanMode === 'sequencing') {
+            let numbers = Array.from({ length: level }, (_, i) => i + 1);
+            if (spanModes.sequencing) {
                 shuffleArray(numbers);
             }
             const selectNext = () => {
@@ -522,21 +553,24 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Checking sequence");
             let correct = true;
             let correctSequence;
-            if (spanMode === 'sequencing') {
-                correctSequence = sequence.slice().sort((a, b) => displayedNumbers[sequence.indexOf(a)] - displayedNumbers[sequence.indexOf(b)]);
-                if (spanMode === 'backwards') {
-                    correctSequence.reverse();
+            if (spanModes.sequencing) {
+                let sortedSequence = displayedNumbers.slice().sort((a, b) => a - b);
+                if (spanModes.backwards) {
+                    sortedSequence.reverse();
+                }
+                if (userSequence.map(index => displayedNumbers[sequence.indexOf(index)]).toString() !== sortedSequence.toString()) {
+                    correct = false;
                 }
             } else {
                 correctSequence = sequence;
-                if (spanMode === 'backwards') {
+                if (spanModes.backwards) {
                     correctSequence = sequence.slice().reverse();
                 }
-            }
-            for (let i = 0; i < correctSequence.length; i++) {
-                if (userSequence[i] !== correctSequence[i]) {
-                    correct = false;
-                    break;
+                for (let i = 0; i < correctSequence.length; i++) {
+                    if (userSequence[i] !== correctSequence[i]) {
+                        correct = false;
+                        break;
+                    }
                 }
             }
 
@@ -609,9 +643,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function toggleBackwardsMode() {
-            spanMode = 'backwards';
-            document.getElementById('backwards-btn').textContent = 'Normal Mode';
-            console.log(`Backwards mode: ${spanMode}`);
+            spanModes.backwards = !spanModes.backwards;
+            document.getElementById('backwards-btn').textContent = spanModes.backwards ? 'Normal Mode' : 'Backwards Mode';
+            console.log(`Backwards mode: ${spanModes.backwards}`);
         }
 
         function toggleRandomMode() {

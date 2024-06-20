@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    window.gameInitialized = false;  
-
     function loadModal() {
         fetch('../Settings/settings-modal.html')
             .then(response => response.text())
@@ -202,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('save-btn').addEventListener('click', () => {
             saveSettings();
             document.getElementById('settingsModal').style.display = 'none';
-            initializeGame();
         });
 
         document.getElementById('cancel-btn').addEventListener('click', () => {
@@ -704,7 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        initializeSettings();
     }
 
     // Load the modal when the page loads

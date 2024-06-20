@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    window.gameInitialized = false;  
+
     function loadModal() {
         fetch('../Settings/settings-modal.html')
             .then(response => response.text())
@@ -109,6 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('speed-input').value = settings.speed;
             document.getElementById('delay-input').value = settings.delayTime;
             document.getElementById('rotation-groups-input').value = settings.rotationGroups;
+
+            // Initialize the game only if not already initialized
+            if (!window.gameInitialized) {
+                window.gameInitialized = true;  // Mark the game as initialized
+                initializeGame();
+            }
         }
 
         function saveSettings() {
@@ -209,6 +217,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeGame() {
+        console.log("Initializing game");
+
         const circleContainer = document.getElementById('circle-container');
         const startBtn = document.getElementById('start-btn');
         const levelDisplay = document.getElementById('level-display');
@@ -221,8 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const speedInput = document.getElementById('speed-input');
         const delayInput = document.getElementById('delay-input');
         const rotationGroupsInput = document.getElementById('rotation-groups-input'); // Input for number of rotation groups
-
-        console.log("Initializing game");
 
         let circles = [];
         let sequence = [];
@@ -489,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     velocities[index].x = speed2 * Math.cos(angle);
                                     velocities.index.y = speed2 * Math.sin(angle);
                                     velocities[j].x = speed1 * Math.cos(angle + Math.PI);
-                                    velocities[j].y = speed1 * Math.sin(angle + Math.PI);
+                                    velocities.j.y = speed1 * Math.sin(angle + Math.PI);
                                 }
                             }
                         }

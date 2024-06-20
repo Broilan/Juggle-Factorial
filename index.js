@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < totalCircles; i++) {
                 const circle = {
                     x: Math.random() * (canvas.width - 30),
-                    y: Math.random() * (canvas.height - 30 - 40) + 40, // Adjusted for info height
+                    y: Math.random() * (canvas.height - 30 - 80) + 40, // Adjusted for info and button container height
                     radius: 15,
                     color: 'blue',
                     isDistractor: i >= level,
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (rotationMode === 1) {
                 const radius = canvas.width / 2.5;
                 const centerX = canvas.width / 2;
-                const centerY = (canvas.height - 40) / 2 + 40; // Adjusted for info height
+                const centerY = (canvas.height - 80) / 2 + 40; // Adjusted for info and button container height
                 const angleStep = (2 * Math.PI) / circles.length;
                 circles.forEach((circle, index) => {
                     const angle = index * angleStep;
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (circle.x - circle.radius <= 0 || circle.x + circle.radius >= canvas.width) {
                         circle.velocity.x *= -1;
                     }
-                    if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height) { // Adjusted for info height
+                    if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height - 80) { // Adjusted for info and button container heights
                         circle.velocity.y *= -1;
                     }
 
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Animating circles in rotation");
             const radius = canvas.width / 2.5;
             const centerX = canvas.width / 2;
-            const centerY = (canvas.height - 40) / 2 + 40; // Adjusted for info height
+            const centerY = (canvas.height - 80) / 2 + 40; // Adjusted for info and button container height
             const groups = parseInt(rotationGroupsInput.value, 10);
             const groupRadiusIncrement = canvas.width / 20;  // Increment radius for each group
             let angleOffsets = Array(groups).fill(0);
@@ -471,7 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Animating circles in combination");
             const radius = canvas.width / 2.5;
             const centerX = canvas.width / 2;
-            const centerY = (canvas.height - 40) / 2 + 40; // Adjusted for info height
+            const centerY = (canvas.height - 80) / 2 + 40; // Adjusted for info and button container height
             const groups = parseInt(rotationGroupsInput.value, 10);
             const groupRadiusIncrement = canvas.width / 20;  // Increment radius for each group
             let angleOffsets = Array(groups).fill(0);
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (circle.x - circle.radius <= 0 || circle.x + circle.radius >= canvas.width) {
                             circle.velocity.x *= -1;
                         }
-                        if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height) { // Adjusted for info height
+                        if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height - 80) { // Adjusted for info and button container heights
                             circle.velocity.y *= -1;
                         }
 
@@ -572,6 +572,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     }
                     circles.forEach(circle => circle.velocity = { x: 0, y: 0 }); // Stop circles from moving
+
+                    // Unmark the last marked circle
+                    if (selected > 0) {
+                        const lastCircle = circles[sequence[selected - 1]];
+                        lastCircle.number = null;
+                        lastCircle.color = 'blue';
+                    }
 
                     startTimer();
                     canvas.addEventListener('click', handleCanvasClick);

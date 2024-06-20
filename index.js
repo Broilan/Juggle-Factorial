@@ -66,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 rotation: false
             },
             flashMode: false,
-            consecutiveMode: true,
             autoProgression: true,
             showAnswers: true,
             level: 3,
@@ -100,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('rotation-btn').checked = settings.movementTypes.rotation;
 
             document.getElementById('flash-btn').textContent = `Flash Mode: ${settings.flashMode ? 'On' : 'Off'}`;
-            document.getElementById('consecutive-btn').textContent = `Consecutive Mode: ${settings.consecutiveMode ? 'On' : 'Off'}`;
             document.getElementById('progression-btn').textContent = `Auto Progression: ${settings.autoProgression ? 'On' : 'Off'}`;
             document.getElementById('show-answers-btn').textContent = `Show Answers: ${settings.showAnswers ? 'On' : 'Off'}`;
 
@@ -123,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
             settings.movementTypes.rotation = document.getElementById('rotation-btn').checked;
 
             settings.flashMode = document.getElementById('flash-btn').textContent.includes('On');
-            settings.consecutiveMode = document.getElementById('consecutive-btn').textContent.includes('On');
             settings.autoProgression = document.getElementById('progression-btn').textContent.includes('On');
             settings.showAnswers = document.getElementById('show-answers-btn').textContent.includes('On');
 
@@ -167,11 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('flash-btn').addEventListener('click', () => {
             settings.flashMode = !settings.flashMode;
             document.getElementById('flash-btn').textContent = `Flash Mode: ${settings.flashMode ? 'On' : 'Off'}`;
-        });
-
-        document.getElementById('consecutive-btn').addEventListener('click', () => {
-            settings.consecutiveMode = !settings.consecutiveMode;
-            document.getElementById('consecutive-btn').textContent = `Consecutive Mode: ${settings.consecutiveMode ? 'Off' : 'On'}`;
         });
 
         document.getElementById('progression-btn').addEventListener('click', () => {
@@ -236,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let randomMode = false;  // Random mode flag
         let rotationMode = 0;  // Rotation mode states: 0 - Normal, 1 - Rotation, 2 - Combination
         let flashMode = false;  // Flash mode flag
-        let consecutiveMode = true; // Consecutive mode flag
         let autoProgression = true; // Automatic level progression flag
         let showAnswers = true; // Show answers flag
         let distractorColors = ['orange', 'pink', 'purple', 'brown', 'cyan', 'gray'];
@@ -262,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
             randomMode = document.getElementById('normal-btn').checked;
             rotationMode = document.getElementById('rotation-btn').checked ? 1 : 0;
             flashMode = document.getElementById('flash-btn').textContent.includes('On');
-            consecutiveMode = document.getElementById('consecutive-btn').textContent.includes('On');
             autoProgression = document.getElementById('progression-btn').textContent.includes('On');
             showAnswers = document.getElementById('show-answers-btn').textContent.includes('On');
             fullResetGame();
@@ -443,11 +433,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         let left = parseFloat(circle.style.left);
                         let top = parseFloat(circle.style.top);
                         left += velocities[index].x;
-                        top += velocities[index].y;
+                        top += velocities.index.y;
 
                         // Bounce off walls
                         if (left <= 0 || left >= 300) velocities[index].x *= -1;
-                        if (top <= 0 || top >= 300) velocities[index].y *= -1;
+                        if (top <= 0 || top >= 300) velocities.index.y *= -1;
 
                         // Bounce off other circles
                         for (let j = 0; j < circles.length; j++) {
@@ -457,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const distance = Math.sqrt(dx * dx + dy * dy);
                                 if (distance < 30) {
                                     const angle = Math.atan2(dy, dx);
-                                    const speed1 = Math.sqrt(velocities[index].x * velocities[index].x + velocities[index].y * velocities[index].y);
+                                    const speed1 = Math.sqrt(velocities[index].x * velocities.index.x + velocities.index.y * velocities.index.y);
                                     const speed2 = Math.sqrt(velocities[j].x * velocities[j].x + velocities[j].y * velocities[j].y);
                                     velocities[index].x = speed2 * Math.cos(angle);
                                     velocities.index.y = speed2 * Math.sin(angle);
@@ -478,8 +468,8 @@ document.addEventListener('DOMContentLoaded', () => {
         function selectCircles() {
             console.log("Selecting circles");
             let selected = 0;
-            const numbers = consecutiveMode ? Array.from({ length: level }, (_, i) => i + 1) : generateNonConsecutiveNumbers(level); // Generate consecutive or non-consecutive numbers
-            if (randomMode) {
+            const numbers = Array.from({ length: level }, (_, i) => i + 1);
+            if (spanMode === 'sequencing') {
                 shuffleArray(numbers);
             }
             const selectNext = () => {
@@ -518,16 +508,6 @@ document.addEventListener('DOMContentLoaded', () => {
             selectNext();
         }
 
-        function generateNonConsecutiveNumbers(count) {
-            const numbers = [];
-            let currentNumber = Math.floor(Math.random() * 5) + 1; // Start with a random number between 1 and 5
-            for (let i = 0; i < count; i++) {
-                numbers.push(currentNumber);
-                currentNumber += Math.floor(Math.random() * 10) + 2; // Add a random number between 2 and 11
-            }
-            return numbers;
-        }
-
         function selectCircle(index) {
             console.log("Circle selected:", index);
             if (userSequence.includes(index)) return;
@@ -542,8 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Checking sequence");
             let correct = true;
             let correctSequence;
-            if (randomMode) {
-                // Create the correct sequence based on numbers displayed on circles
+            if (spanMode === 'sequencing') {
                 correctSequence = sequence.slice().sort((a, b) => displayedNumbers[sequence.indexOf(a)] - displayedNumbers[sequence.indexOf(b)]);
                 if (spanMode === 'backwards') {
                     correctSequence.reverse();
@@ -663,12 +642,6 @@ document.addEventListener('DOMContentLoaded', () => {
             flashMode = !flashMode;
             document.getElementById('flash-btn').textContent = flashMode ? 'Normal Mode' : 'Flash Mode';
             console.log(`Flash mode: ${flashMode}`);
-        }
-
-        function toggleNonConsecutiveMode() {
-            consecutiveMode = !consecutiveMode;
-            document.getElementById('non-consecutive-btn').textContent = consecutiveMode ? 'Consecutive Mode' : 'Non-Consecutive Mode';
-            console.log(`Consecutive mode: ${consecutiveMode}`);
         }
 
         function toggleAutoProgression() {

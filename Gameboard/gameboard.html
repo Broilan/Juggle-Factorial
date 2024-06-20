@@ -6,19 +6,79 @@
     <title>Jiggle Factorial</title>
     <link rel="stylesheet" href="../Settings/settings-modal.css">
     <link rel="stylesheet" href="./gameboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <h1 class="header">Jiggle Factorial</h1>
-    <button class="settings-button" id="settingsBtn">Settings</button>
+    <h2 class="header">Jiggle Factorial</h2>
+
     <div id="circle-container"></div>
     
-    <button id="start-btn">start</button>
+    <div id="button-container">
+        <button id="start-btn">start</button>
+        <i id="infoBtn" class="fas fa-book"></i>  
+        <i id="settingsBtn" class="fas fa-cog"></i>
+    </div>
+
     <div id="info">
         <div id="level-display">Level: 3</div>
         <div id="timer-display">Timer: 30s</div>
         <div id="average-level-display">Average Level: 3</div>
     </div>
     <div id="modal-container"></div>
-    <script src="../index.js"></script>
+
+ <!-- The Modal -->
+ <div id="infoModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div class="icon-container">
+          <i class="fas fa-book"></i>
+      </div>
+      <h1><strong>Overview</strong></h1>
+      <p>Jiggle Factorial is designed to mimic Brain HQ's "Juggle Factor," which serves to measure and improve multitasking ability, processing speed, working memory, and attention.</p>
+      <h2><strong>Game Play</strong></h2>
+      <p>Start the game by clicking the <strong>Start</strong> button. Follow the instructions and use the span and movement types to complete the levels. Use the settings to customize your game experience.</p>
+      <h2><strong>Span Types</strong></h2>
+      <p><strong>Forward:</strong> The span will increase by one each time you get a correct answer.</p>
+      <p><strong>Backwards:</strong> The span will decrease by one each time you get a correct answer.</p>
+      <p><strong>Sequencing:</strong> Random numbers will be generated, and you'll return them in either ascending or descending consecutive order depending on whether you've selected forwards or backwards span.</p>
+      <h2><strong>Movement Types</strong></h2>
+      <p><strong>Normal:</strong> Circles will move around the screen in random directions.</p>
+      <p><strong>Rotation:</strong> Circles will rotate around a central point.</p>
+      <h2><strong>Game Settings</strong></h2>
+      <p><strong>Flash Mode:</strong> Toggle flash mode to make circles flash intermittently.</p>
+      <p><strong>Auto Progression:</strong> Automatically progress to the next level upon a correct sequence.</p>
+      <p><strong>Show Answers:</strong> Display the correct sequence after an incorrect attempt.</p>
+    </div>
+  </div>
+
+  <script src="../index.js"></script>
+  <script>
+      // Get the modal
+      var infoModal = document.getElementById("infoModal");
+
+      // Get the button that opens the modal
+      var infoBtn = document.getElementById("infoBtn");
+
+      // Get the <span> element that closes the modal
+      var closeSpan = document.getElementsByClassName("close")[0];
+
+      // When the user clicks the button, open the modal 
+      infoBtn.onclick = function() {
+          infoModal.style.display = "block";
+      }
+
+      // When the user clicks on <span> (x), close the modal
+      closeSpan.onclick = function() {
+          infoModal.style.display = "none";
+      }
+
+      // When the user clicks anywhere outside of the modal, close it
+      window.onclick = function(event) {
+          if (event.target == infoModal) {
+              infoModal.style.display = "none";
+          }
+      }
+  </script>
 </body>
 </html>

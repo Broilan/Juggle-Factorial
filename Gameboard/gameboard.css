@@ -5,17 +5,13 @@ body {
     font-family: Arial, sans-serif;
     background-color: #e8f0fe;
     margin: 0;
+    overflow: hidden;
     padding: 20px;
 }
 
 a {
     text-decoration: none;
     color: black;
-}
-
-h1 {
-    color: #333;
-    margin-bottom: 20px;
 }
 
 #button-container {
@@ -25,42 +21,61 @@ h1 {
     margin-top: 20px;
 }
 
-.modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1; 
+.instructions-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
     left: 0;
     top: 0;
-    width: 100%; 
-    height: 100%; 
-    overflow: auto; 
-    background-color: rgb(0,0,0); 
-    background-color: rgba(0,0,0,0.4); 
-}
-
-/* Modal content */
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto; 
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+  
+  .instructions-modal-content {
+    background-color: white;
     padding: 20px;
-    border: 1px solid #888;
-    width: 80%; 
-    max-width: 500px; 
+    border: 1px solid black;
+    border-radius: 20px;
+    width: 400px;
+    height: 500px;
+    overflow-y: auto;
+    animation: fadeIn 0.5s;
+  }
+
+  /* Hide scrollbar for Webkit browsers */
+.instructions-modal-content::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
-/* Close button */
-.close {
+/* Hide scrollbar for IE, Edge and Firefox */
+.instructions-modal-content {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+  
+  .instructions-close {
     color: #aaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
+  }
+  
+  .instructions-close:hover,
+  .instructions-close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
+  }
+  
+
+#settings-scroll {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 /* Book icon styling */

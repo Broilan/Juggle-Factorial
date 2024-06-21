@@ -19,35 +19,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeModal() {
         console.log("Initializing modal");
 
-        // Get the modal
         let modal = document.getElementById("settingsModal");
-
-        // Get the button that opens the modal
         let openModalBtn = document.getElementById("settingsBtn");
-
-        // Get the <span> element that closes the modal
         let closeModalBtn = document.getElementById("closeBtn");
 
-        // When the user clicks on the button, open the modal
         openModalBtn.onclick = () => {
             modal.style.display = "flex";
             modal.style.justifyContent = "center";
             modal.style.alignItems = "center";
         };
 
-        // When the user clicks on <span> (x), close the modal
         closeModalBtn.onclick = () => {
             modal.style.display = "none";
         };
 
-        // When the user clicks anywhere outside of the modal, close it
         window.onclick = (event) => {
             if (event.target == modal) {
                 modal.style.display = "none";
             }
         };
 
-        // Initialize settings and event listeners
         initializeSettings();
     }
 
@@ -109,9 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('delay-input').value = settings.delayTime;
             document.getElementById('rotation-groups-input').value = settings.rotationGroups;
 
-            // Initialize the game only if not already initialized
             if (!window.gameInitialized) {
-                window.gameInitialized = true;  // Mark the game as initialized
+                window.gameInitialized = true;
                 initializeGame();
             }
         }
@@ -141,13 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Settings saved:", settings);
         }
 
-        // Function to handle span type checkbox changes
         function handleSpanTypeChange() {
             const forwardsBox = document.getElementById('forwards-btn');
             const backwardsBox = document.getElementById('backwards-btn');
             const sequencingBox = document.getElementById('sequencing-btn');
 
-            // Only allow specific combinations
             if (forwardsBox.checked && backwardsBox.checked) {
                 backwardsBox.checked = false;
             }
@@ -160,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Function to handle movement type checkbox changes
         function handleMovementTypeChange() {
             const normalBox = document.getElementById('normal-btn');
             const rotationBox = document.getElementById('rotation-btn');
@@ -171,16 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Event listeners for span type checkboxes
         document.getElementById('forwards-btn').addEventListener('change', handleSpanTypeChange);
         document.getElementById('backwards-btn').addEventListener('change', handleSpanTypeChange);
         document.getElementById('sequencing-btn').addEventListener('change', handleSpanTypeChange);
 
-        // Event listeners for movement type checkboxes
         document.getElementById('normal-btn').addEventListener('change', handleMovementTypeChange);
         document.getElementById('rotation-btn').addEventListener('change', handleMovementTypeChange);
 
-        // Event listeners for other settings
         document.getElementById('flash-btn').addEventListener('click', () => {
             settings.flashMode = !settings.flashMode;
             document.getElementById('flash-btn').textContent = `Flash Mode: ${settings.flashMode ? 'On' : 'Off'}`;
@@ -221,42 +205,54 @@ document.addEventListener('DOMContentLoaded', () => {
         const levelDisplay = document.getElementById('level-display');
         const timerDisplay = document.getElementById('timer-display');
         const averageLevelDisplay = document.getElementById('average-level-display');
-        const levelInput = document.getElementById('level-input');
-        const timerInput = document.getElementById('timer-input');
-        const selectTimeInput = document.getElementById('select-time-input');
-        const randomDistractorsInput = document.getElementById('random-distractors-input');
-        const speedInput = document.getElementById('speed-input');
-        const delayInput = document.getElementById('delay-input');
-        const rotationGroupsInput = document.getElementById('rotation-groups-input'); // Input for number of rotation groups
+
+        const elements = [
+            { name: 'canvas', element: canvas },
+            { name: 'ctx', element: ctx },
+            { name: 'startBtn', element: startBtn },
+            { name: 'levelDisplay', element: levelDisplay },
+            { name: 'timerDisplay', element: timerDisplay },
+            { name: 'averageLevelDisplay', element: averageLevelDisplay },
+        ];
+
+        for (let { name, element } of elements) {
+            if (!element) {
+                console.error(`Element ${name} is missing in the DOM`);
+                return;
+            }
+        }
 
         let circles = [];
         let sequence = [];
-        let displayedNumbers = []; // To track numbers displayed on circles
+        let displayedNumbers = []; 
         let userSequence = [];
-        let level = parseInt(levelInput.value, 10);  // Default level
         let interval;
         let animationInterval;
         let flashInterval;
         let selectionTimeout;
         let timer;
-        let timeLeft = parseInt(timerInput.value, 10);  // Default timer value
-        let selectTime = parseFloat(selectTimeInput.value) * 1000;  // Convert to milliseconds
-        let randomDistractors = parseInt(randomDistractorsInput.value, 10);
-        let speed = parseFloat(speedInput.value);
-        let delayTime = parseFloat(delayInput.value) * 1000;  // Convert to milliseconds
-        let spanModes = {
-            forwards: document.getElementById('forwards-btn').checked,
-            backwards: document.getElementById('backwards-btn').checked,
-            sequencing: document.getElementById('sequencing-btn').checked
-        };
-        let randomMode = document.getElementById('normal-btn').checked;
-        let rotationMode = document.getElementById('rotation-btn').checked ? 1 : 0;
-        let flashMode = document.getElementById('flash-btn').textContent.includes('On');
-        let autoProgression = document.getElementById('progression-btn').textContent.includes('On');
-        let showAnswers = document.getElementById('show-answers-btn').textContent.includes('On');
+
+        const settings = JSON.parse(localStorage.getItem('settings'));
+        if (!settings) {
+            console.error('Settings not found. Make sure the settings modal is initialized and saved.');
+            return;
+        }
+
+        let level = settings.level;
+        let timeLeft = settings.timer;
+        let selectTime = settings.selectTime * 1000; 
+        let randomDistractors = settings.randomDistractors;
+        let speed = settings.speed;
+        let delayTime = settings.delayTime * 1000;  
+        let spanModes = settings.spanTypes;
+        let randomMode = settings.movementTypes.normal;
+        let rotationMode = settings.movementTypes.rotation ? 1 : 0;
+        let flashMode = settings.flashMode;
+        let autoProgression = settings.autoProgression;
+        let showAnswers = settings.showAnswers;
         let distractorColors = ['orange', 'pink', 'purple', 'brown', 'cyan', 'gray'];
-        let levelHistory = [];  // Track the levels the player has been on
-        let velocities = []; // Velocity array for circles
+        let levelHistory = [];  
+        let velocities = []; 
 
         if (startBtn) {
             startBtn.addEventListener('click', startGame);
@@ -266,33 +262,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function startGame() {
             console.log("Game started");
-            if (!document.getElementById('forwards-btn').checked && !document.getElementById('backwards-btn').checked) {
+            if (!spanModes.forwards && !spanModes.backwards) {
                 alert("Please select a span type to start the game.");
                 return;
             }
-            if (!document.getElementById('normal-btn').checked && !document.getElementById('rotation-btn').checked) {
+            if (!randomMode && rotationMode === 0) {
                 alert("Please select at least one movement type.");
                 return;
             }
 
-            level = parseInt(levelInput.value, 10);
-            timeLeft = parseInt(timerInput.value, 10);
-            selectTime = parseFloat(selectTimeInput.value) * 1000;
-            randomDistractors = parseInt(randomDistractorsInput.value, 10);
-            speed = parseFloat(speedInput.value);
-            delayTime = parseFloat(delayInput.value) * 1000;
-            spanModes = {
-                forwards: document.getElementById('forwards-btn').checked,
-                backwards: document.getElementById('backwards-btn').checked,
-                sequencing: document.getElementById('sequencing-btn').checked
-            };
-            randomMode = document.getElementById('normal-btn').checked;
-            rotationMode = document.getElementById('rotation-btn').checked ? 1 : 0;
-            flashMode = document.getElementById('flash-btn').textContent.includes('On');
-            autoProgression = document.getElementById('progression-btn').textContent.includes('On');
-            showAnswers = document.getElementById('show-answers-btn').textContent.includes('On');
-
-            // Change start button to stop button
             startBtn.textContent = 'Stop';
             startBtn.style.backgroundColor = 'red';
             startBtn.onclick = () => location.reload();
@@ -309,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (flashMode) {
                 startFlashMode();
             }
-            selectionTimeout = setTimeout(selectCircles, 1000);  // Delay before starting the selection process
+            selectionTimeout = setTimeout(selectCircles, 1000); 
         }
 
         function fullResetGame() {
@@ -342,11 +320,10 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Creating circles");
             const totalCircles = level + randomDistractors;
 
-            // Create circles
             for (let i = 0; i < totalCircles; i++) {
                 const circle = {
                     x: Math.random() * (canvas.width - 30),
-                    y: Math.random() * (canvas.height - 30 - 80) + 40, // Adjusted for info and button container height
+                    y: Math.random() * (canvas.height - 30 - 80) + 40,
                     radius: 15,
                     color: 'blue',
                     isDistractor: i >= level,
@@ -367,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (rotationMode === 1) {
                 const radius = canvas.width / 2.5;
                 const centerX = canvas.width / 2;
-                const centerY = (canvas.height - 80) / 2 + 40; // Adjusted for info and button container height
+                const centerY = (canvas.height - 80) / 2 + 40;
                 const angleStep = (2 * Math.PI) / circles.length;
                 circles.forEach((circle, index) => {
                     const angle = index * angleStep;
@@ -377,69 +354,73 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            circles.forEach((circle, index) => {
+                ctx.beginPath();
+                ctx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
+                ctx.fillStyle = circle.color;
+                ctx.fill();
+                if (circle.number !== null) {
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(circle.number, circle.x, circle.y);
+                }
+                ctx.closePath();
+
+                console.log(`Drawing circle ${index} with color ${circle.color}`);
+
+                circle.x += circle.velocity.x;
+                circle.y += circle.velocity.y;
+
+                if (circle.x - circle.radius <= 0 || circle.x + circle.radius >= canvas.width) {
+                    circle.velocity.x *= -1;
+                }
+                if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height - 80) { 
+                    circle.velocity.y *= -1;
+                }
+
+                circles.forEach(otherCircle => {
+                    if (circle !== otherCircle) {
+                        const dx = circle.x - otherCircle.x;
+                        const dy = circle.y - otherCircle.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < circle.radius + otherCircle.radius) {
+                            const angle = Math.atan2(dy, dx);
+                            const speed1 = Math.sqrt(circle.velocity.x * circle.velocity.x + circle.velocity.y * circle.velocity.y);
+                            const speed2 = Math.sqrt(otherCircle.velocity.x * otherCircle.velocity.x + otherCircle.velocity.y * otherCircle.velocity.y);
+                            circle.velocity.x = speed2 * Math.cos(angle);
+                            circle.velocity.y = speed2 * Math.sin(angle);
+                            otherCircle.velocity.x = speed1 * Math.cos(angle + Math.PI);
+                            otherCircle.velocity.y = speed1 * Math.sin(angle + Math.PI);
+                        }
+                    }
+                });
+            });
+        }
+
         function animateCircles() {
             console.log("Animating circles");
-            function draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                circles.forEach(circle => {
-                    ctx.beginPath();
-                    ctx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
-                    ctx.fillStyle = circle.color;
-                    ctx.fill();
-                    if (circle.number !== null) {
-                        ctx.fillStyle = 'white';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(circle.number, circle.x, circle.y);
-                    }
-                    ctx.closePath();
-
-                    circle.x += circle.velocity.x;
-                    circle.y += circle.velocity.y;
-
-                    // Bounce off walls
-                    if (circle.x - circle.radius <= 0 || circle.x + circle.radius >= canvas.width) {
-                        circle.velocity.x *= -1;
-                    }
-                    if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height - 80) { // Adjusted for info and button container heights
-                        circle.velocity.y *= -1;
-                    }
-
-                    // Bounce off other circles
-                    circles.forEach(otherCircle => {
-                        if (circle !== otherCircle) {
-                            const dx = circle.x - otherCircle.x;
-                            const dy = circle.y - otherCircle.y;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            if (distance < circle.radius + otherCircle.radius) {
-                                const angle = Math.atan2(dy, dx);
-                                const speed1 = Math.sqrt(circle.velocity.x * circle.velocity.x + circle.velocity.y * circle.velocity.y);
-                                const speed2 = Math.sqrt(otherCircle.velocity.x * otherCircle.velocity.x + otherCircle.velocity.y * otherCircle.velocity.y);
-                                circle.velocity.x = speed2 * Math.cos(angle);
-                                circle.velocity.y = speed2 * Math.sin(angle);
-                                otherCircle.velocity.x = speed1 * Math.cos(angle + Math.PI);
-                                otherCircle.velocity.y = speed1 * Math.sin(angle + Math.PI);
-                            }
-                        }
-                    });
-                });
-                animationInterval = requestAnimationFrame(draw);
+            function loop() {
+                draw();
+                animationInterval = requestAnimationFrame(loop);
             }
-            draw();
+            loop(); 
         }
 
         function animateCirclesInRotation() {
             console.log("Animating circles in rotation");
             const radius = canvas.width / 2.5;
             const centerX = canvas.width / 2;
-            const centerY = (canvas.height - 80) / 2 + 40; // Adjusted for info and button container height
-            const groups = parseInt(rotationGroupsInput.value, 10);
-            const groupRadiusIncrement = canvas.width / 20;  // Increment radius for each group
+            const centerY = (canvas.height - 80) / 2 + 40;
+            const groups = parseInt(settings.rotationGroups, 10);
+            const groupRadiusIncrement = canvas.width / 20;
             let angleOffsets = Array(groups).fill(0);
-            const speeds = Array.from({ length: groups }, () => speed * (Math.random() * 1 + 0.5));  // Random speed between 50-150% of the speed
-            const directions = Array.from({ length: groups }, () => Math.random() < 0.5 ? 1 : -1);  // Random directions for each group
+            const speeds = Array.from({ length: groups }, () => speed * (Math.random() * 1 + 0.5));
+            const directions = Array.from({ length: groups }, () => Math.random() < 0.5 ? 1 : -1);
 
-            function draw() {
+            function loop() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 circles.forEach((circle, index) => {
                     const group = index % groups;
@@ -462,24 +443,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     ctx.closePath();
                 });
                 angleOffsets = angleOffsets.map((offset, group) => offset + speeds[group] * 0.01);
-                animationInterval = requestAnimationFrame(draw);
+                animationInterval = requestAnimationFrame(loop);
             }
-            draw();
+            loop();
         }
 
         function animateCirclesInCombination() {
             console.log("Animating circles in combination");
             const radius = canvas.width / 2.5;
             const centerX = canvas.width / 2;
-            const centerY = (canvas.height - 80) / 2 + 40; // Adjusted for info and button container height
-            const groups = parseInt(rotationGroupsInput.value, 10);
-            const groupRadiusIncrement = canvas.width / 20;  // Increment radius for each group
+            const centerY = (canvas.height - 80) / 2 + 40;
+            const groups = parseInt(settings.rotationGroups, 10);
+            const groupRadiusIncrement = canvas.width / 20;
             let angleOffsets = Array(groups).fill(0);
-            const speeds = Array.from({ length: groups }, () => speed * (Math.random() * 1 + 0.5));  // Random speed between 50-150% of the speed
-            const directions = Array.from({ length: groups }, () => Math.random() < 0.5 ? 1 : -1);  // Random directions for each group
+            const speeds = Array.from({ length: groups }, () => speed * (Math.random() * 1 + 0.5));
+            const directions = Array.from({ length: groups }, () => Math.random() < 0.5 ? 1 : -1);
             const halfCircles = Math.floor(circles.length / 2);
 
-            function draw() {
+            function loop() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 circles.forEach((circle, index) => {
                     if (index < halfCircles) {
@@ -493,15 +474,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         circle.x += circle.velocity.x;
                         circle.y += circle.velocity.y;
 
-                        // Bounce off walls
                         if (circle.x - circle.radius <= 0 || circle.x + circle.radius >= canvas.width) {
                             circle.velocity.x *= -1;
                         }
-                        if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height - 80) { // Adjusted for info and button container heights
+                        if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height - 80) {
                             circle.velocity.y *= -1;
                         }
 
-                        // Bounce off other circles
                         circles.forEach(otherCircle => {
                             if (circle !== otherCircle) {
                                 const dx = circle.x - otherCircle.x;
@@ -533,9 +512,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     ctx.closePath();
                 });
                 angleOffsets = angleOffsets.map((offset, group) => offset + speeds[group] * 0.01);
-                animationInterval = requestAnimationFrame(draw);
+                animationInterval = requestAnimationFrame(loop);
             }
-            draw();
+            loop();
         }
 
         function selectCircles() {
@@ -550,34 +529,37 @@ document.addEventListener('DOMContentLoaded', () => {
                     const previousCircle = circles[sequence[selected - 1]];
                     previousCircle.number = null;
                     previousCircle.color = 'blue';
+                    console.log(`Circle ${sequence[selected - 1]} set to blue`);
                 }
                 if (selected < level) {
                     let index;
                     do {
-                        index = Math.floor(Math.random() * circles.length);  // Select from all circles
+                        index = Math.floor(Math.random() * circles.length);
                     } while (sequence.includes(index) || circles[index].isDistractor);
                     circles[index].color = 'red';
                     circles[index].number = numbers[selected];
-                    displayedNumbers.push(numbers[selected]); // Store the displayed number
+                    displayedNumbers.push(numbers[selected]);
                     sequence.push(index);
+
+                    console.log(`Circle ${index} set to red with number ${numbers[selected]}`);
 
                     selected++;
                     setTimeout(selectNext, selectTime);
                 } else {
-                    cancelAnimationFrame(animationInterval); // Stop circles from moving
+                    cancelAnimationFrame(animationInterval);
                     if (flashMode) {
                         clearInterval(flashInterval);
                         circles.forEach(circle => {
                             circle.visible = true;
                         });
                     }
-                    circles.forEach(circle => circle.velocity = { x: 0, y: 0 }); // Stop circles from moving
+                    circles.forEach(circle => circle.velocity = { x: 0, y: 0 });
 
-                    // Unmark the last marked circle
                     if (selected > 0) {
                         const lastCircle = circles[sequence[selected - 1]];
                         lastCircle.number = null;
                         lastCircle.color = 'blue';
+                        console.log(`Last Circle ${sequence[selected - 1]} set to blue`);
                     }
 
                     startTimer();
@@ -606,7 +588,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Circle selected:", index);
             if (userSequence.includes(index)) return;
             circles[index].color = 'yellow';
+            console.log(`Circle ${index} set to yellow`);
+            console.log(circles[index]);
             userSequence.push(index);
+
+            draw();
+
             if (userSequence.length === sequence.length) {
                 checkSequence();
             }
@@ -639,33 +626,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (correct) {
                 alert('Correct! Proceeding to the next level.');
-                levelHistory.push(level);  // Track the current level
+                levelHistory.push(level);
                 updateAverageLevel();
                 if (autoProgression) {
                     level++;
                 }
-                levelInput.value = level;
+                settings.level = level;  // Update the settings with the new level
                 startGame();
             } else {
                 if (showAnswers) {
                     alert('Incorrect. Showing correct sequence.');
                     showCorrectSequence(() => {
-                        levelHistory.push(level);  // Track the current level
+                        levelHistory.push(level);
                         updateAverageLevel();
                         if (autoProgression) {
                             level = Math.max(1, level - 1);
                         }
-                        levelInput.value = level;
+                        settings.level = level;  // Update the settings with the new level
                         startGame();
                     });
                 } else {
                     alert('Incorrect. Proceeding to the next level.');
-                    levelHistory.push(level);  // Track the current level
+                    levelHistory.push(level);
                     updateAverageLevel();
                     if (autoProgression) {
                         level = Math.max(1, level - 1);
                     }
-                    levelInput.value = level;
+                    settings.level = level;  // Update the settings with the new level
                     startGame();
                 }
             }
@@ -683,7 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     circles[index].color = 'blue';
                 });
                 callback();
-            }, 3000); // Show the correct sequence for 3 seconds
+            }, 3000);
         }
 
         function startTimer() {
@@ -694,12 +681,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (timeLeft === 0) {
                     clearInterval(timer);
                     alert('Time is up! Game Over.');
-                    levelHistory.push(level);  // Track the current level
+                    levelHistory.push(level);
                     updateAverageLevel();
                     if (autoProgression) {
                         level = Math.max(1, level - 1);
                     }
-                    levelInput.value = level;
+                    settings.level = level;  // Update the settings with the new level
                     startGame();
                 }
             }, 1000);
@@ -714,7 +701,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function startFlashMode() {
             console.log("Starting flash mode");
             flashInterval = setInterval(() => {
-                const numCirclesToFlash = Math.floor(Math.random() * (circles.length / 2)) + 1;  // Random number of circles to flash
+                const numCirclesToFlash = Math.floor(Math.random() * (circles.length / 2)) + 1;
                 const circlesToFlash = [];
 
                 for (let i = 0; i < numCirclesToFlash; i++) {
@@ -733,9 +720,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     setTimeout(() => {
                         circle.color = originalColor;
-                    }, 500);  // Make the circle visible again after 500ms
+                    }, 500);
                 });
-            }, 2000);  // Repeat the process every 2 seconds
+            }, 2000);
         }
 
         function shuffleArray(array) {
@@ -744,8 +731,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
+
+        loadModal();
     }
 
-    // Load the modal when the page loads
-    loadModal();
+    initializeGame();
 });

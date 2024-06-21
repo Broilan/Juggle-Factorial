@@ -5,13 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 document.getElementById('modal-container').innerHTML = data;
 
-                // Inject CSS
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
                 link.href = '../Settings/settings-modal.css';
                 document.head.appendChild(link);
 
-                // Initialize modal functionality after content is loaded
                 initializeModal();
             });
     }
@@ -177,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('save-btn').addEventListener('click', () => {
             saveSettings();
-            applySettings(); // Apply settings immediately after saving
+            applySettings(); 
             document.getElementById('settingsModal').style.display = 'none';
         });
 
@@ -240,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let settings = getSettings();
         if (!settings) return;
 
+        let initialLevel = settings.level;
         let level = settings.level;
         let timeLeft = settings.timer;
         let selectTime = settings.selectTime * 1000; 
@@ -268,11 +267,9 @@ document.addEventListener('DOMContentLoaded', () => {
         function startGame() {
             console.log("Game started");
 
-            // Reload settings to ensure the latest values are used
             settings = getSettings();
             if (!settings) return;
 
-            // Update variables with the latest settings
             level = settings.level;
             timeLeft = settings.timer;
             selectTime = settings.selectTime * 1000;
@@ -297,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             startBtn.textContent = 'Stop';
             startBtn.style.backgroundColor = 'red';
-            startBtn.onclick = () => location.reload();
+            startBtn.onclick = () => endGame();
 
             fullResetGame();
             createCircles();
@@ -655,7 +652,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (autoProgression) {
                     level++;
                 }
-                settings.level = level;  // Update the settings with the new level
+                settings.level = level;
+                localStorage.setItem('settings', JSON.stringify(settings)); 
                 startGame();
             } else {
                 if (showAnswers) {
@@ -666,7 +664,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (autoProgression) {
                             level = Math.max(1, level - 1);
                         }
-                        settings.level = level;  // Update the settings with the new level
+                        settings.level = level;
+                        localStorage.setItem('settings', JSON.stringify(settings)); 
                         startGame();
                     });
                 } else {
@@ -676,7 +675,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (autoProgression) {
                         level = Math.max(1, level - 1);
                     }
-                    settings.level = level;  // Update the settings with the new level
+                    settings.level = level;
+                    localStorage.setItem('settings', JSON.stringify(settings)); 
                     startGame();
                 }
             }
@@ -710,7 +710,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (autoProgression) {
                         level = Math.max(1, level - 1);
                     }
-                    settings.level = level;  // Update the settings with the new level
+                    settings.level = level;
+                    localStorage.setItem('settings', JSON.stringify(settings)); 
                     startGame();
                 }
             }, 1000);
@@ -720,6 +721,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalLevels = levelHistory.reduce((sum, lvl) => sum + lvl, 0);
             const averageLevel = (totalLevels / levelHistory.length).toFixed(1);
             averageLevelDisplay.textContent = `Average Level: ${averageLevel}`;
+        }
+
+        function endGame() {
+            console.log("Ending game and resetting level");
+            settings.level = initialLevel;
+            localStorage.setItem('settings', JSON.stringify(settings)); 
+            location.reload();
         }
 
         function startFlashMode() {

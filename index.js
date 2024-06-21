@@ -99,11 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('speed-input').value = settings.speed;
             document.getElementById('delay-input').value = settings.delayTime;
             document.getElementById('rotation-groups-input').value = settings.rotationGroups;
-
-            if (!window.gameInitialized) {
-                window.gameInitialized = true;
-                initializeGame();
-            }
         }
 
         function saveSettings() {
@@ -182,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('save-btn').addEventListener('click', () => {
             saveSettings();
+            applySettings(); // Apply settings immediately after saving
             document.getElementById('settingsModal').style.display = 'none';
         });
 
@@ -232,11 +228,17 @@ document.addEventListener('DOMContentLoaded', () => {
         let selectionTimeout;
         let timer;
 
-        const settings = JSON.parse(localStorage.getItem('settings'));
-        if (!settings) {
-            console.error('Settings not found. Make sure the settings modal is initialized and saved.');
-            return;
+        function getSettings() {
+            const settings = JSON.parse(localStorage.getItem('settings'));
+            if (!settings) {
+                console.error('Settings not found. Make sure the settings modal is initialized and saved.');
+                return null;
+            }
+            return settings;
         }
+
+        let settings = getSettings();
+        if (!settings) return;
 
         let level = settings.level;
         let timeLeft = settings.timer;
@@ -255,13 +257,35 @@ document.addEventListener('DOMContentLoaded', () => {
         let velocities = []; 
 
         if (startBtn) {
-            startBtn.addEventListener('click', startGame);
+            startBtn.addEventListener('click', () => {
+                settings = getSettings();
+                if (settings) startGame();
+            });
         } else {
             console.error('Start button not found');
         }
 
         function startGame() {
             console.log("Game started");
+
+            // Reload settings to ensure the latest values are used
+            settings = getSettings();
+            if (!settings) return;
+
+            // Update variables with the latest settings
+            level = settings.level;
+            timeLeft = settings.timer;
+            selectTime = settings.selectTime * 1000;
+            randomDistractors = settings.randomDistractors;
+            speed = settings.speed;
+            delayTime = settings.delayTime * 1000;
+            spanModes = settings.spanTypes;
+            randomMode = settings.movementTypes.normal;
+            rotationMode = settings.movementTypes.rotation ? 1 : 0;
+            flashMode = settings.flashMode;
+            autoProgression = settings.autoProgression;
+            showAnswers = settings.showAnswers;
+
             if (!spanModes.forwards && !spanModes.backwards) {
                 alert("Please select a span type to start the game.");
                 return;

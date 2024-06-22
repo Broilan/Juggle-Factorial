@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             movementTypes: {
                 normal: true,
-                rotation: false
+                rotation: false,
+                combination: false
             },
             flashMode: false,
             autoProgression: true,
@@ -84,7 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.getElementById('normal-btn').checked = settings.movementTypes.normal;
             document.getElementById('rotation-btn').checked = settings.movementTypes.rotation;
-
+            document.getElementById('combination-btn').checked = settings.movementTypes.combination;
+            
             document.getElementById('flash-btn').textContent = `Flash Mode: ${settings.flashMode ? 'On' : 'Off'}`;
             document.getElementById('progression-btn').textContent = `Auto Progression: ${settings.autoProgression ? 'On' : 'Off'}`;
             document.getElementById('show-answers-btn').textContent = `Show Answers: ${settings.showAnswers ? 'On' : 'Off'}`;
@@ -97,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('delay-input').value = settings.delayTime;
             document.getElementById('rotation-groups-input').value = settings.rotationGroups;
 
-            toggleRotationGroupsInput(settings.movementTypes.rotation);
+            toggleRotationGroupsInput(settings.movementTypes.rotation || settings.movementTypes.combination);
 
             // Add event listener for window resize
             window.addEventListener('resize', checkScreenSize);
@@ -135,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             settings.movementTypes.normal = document.getElementById('normal-btn').checked;
             settings.movementTypes.rotation = document.getElementById('rotation-btn').checked;
+            settings.movementTypes.combination = document.getElementById('combination-btn').checked;
 
             settings.flashMode = document.getElementById('flash-btn').textContent.includes('On');
             settings.autoProgression = document.getElementById('progression-btn').textContent.includes('On');
@@ -173,25 +176,44 @@ document.addEventListener('DOMContentLoaded', () => {
         function handleMovementTypeChange() {
             const normalBox = document.getElementById('normal-btn');
             const rotationBox = document.getElementById('rotation-btn');
+            const combinationBox = document.getElementById('combination-btn');
 
             normalBox.onclick = () => {
                 rotationBox.checked = false;
+                combinationBox.checked = false;
                 settings.rotationGroups = 0;
                 toggleRotationGroupsInput(false);
             };
 
             rotationBox.onclick = () => {
                 normalBox.checked = false;
+                combinationBox.checked = false;
                 settings.rotationGroups = 1;
                 toggleRotationGroupsInput(true);
             };
 
-            if (!normalBox.checked && !rotationBox.checked) {
+            combinationBox.onclick = () => {
+                normalBox.checked = false;
+                rotationBox.checked = false;
+                settings.rotationGroups = 1;
+                toggleRotationGroupsInput(false);
+            };
+
+            if (!normalBox.checked && !rotationBox.checked && !combinationBox.checked) {
                 normalBox.checked = true;
             } else if (normalBox.checked && rotationBox.checked) {
                 normalBox.checked = true;
                 rotationBox.checked = false;
-            };
+                combinationBox.checked = false;
+            } else if (normalBox.checked && combinationBox.checked) {
+                normalBox.checked = true;
+                rotationBox.checked = false;
+                combinationBox.checked = false;
+            } else if (rotationBox.checked && combinationBox.checked) {
+                normalBox.checked = false;
+                rotationBox.checked = true;
+                combinationBox.checked = false;
+            }
 
         }
 
@@ -206,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('normal-btn').addEventListener('change', handleMovementTypeChange);
         document.getElementById('rotation-btn').addEventListener('change', handleMovementTypeChange);
+        document.getElementById('combination-btn').addEventListener('change', handleMovementTypeChange);
 
         document.getElementById('flash-btn').addEventListener('click', () => {
             settings.flashMode = !settings.flashMode;
@@ -269,7 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     movementTypes: {
                         normal: true,
-                        rotation: false
+                        rotation: false,
+                        combination: false
                     },
                     flashMode: false,
                     autoProgression: true,
@@ -298,15 +322,18 @@ document.addEventListener('DOMContentLoaded', () => {
         let spanModes = settings.spanTypes;
         let randomMode = settings.movementTypes.normal;
         let rotationMode = settings.movementTypes.rotation ? 1 : 0;
+        let combinationMode = settings.movementTypes.combination;
         let flashMode = settings.flashMode;
         let autoProgression = settings.autoProgression;
         let showAnswers = settings.showAnswers;
-        let distractorColors = ['orange', 'pink', 'purple', 'brown', 'cyan', 'gray'];
+        let distractorColors = ['orange', 'pink', 'purple', 'brown', 'gray'];
         let levelHistory = [];
         let velocities = [];
+        let angleOffsets = [];
+        let speeds = [];
+        let directions = [];
 
         canvas.addEventListener('click', startGame, { once: true });
-
 
         function startGame() {
             document.getElementById('title').style.display = 'none';
@@ -330,6 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
             spanModes = settings.spanTypes;
             randomMode = settings.movementTypes.normal;
             rotationMode = settings.movementTypes.rotation ? 1 : 0;
+            combinationMode = settings.movementTypes.combination;
             flashMode = settings.flashMode;
             autoProgression = settings.autoProgression;
             showAnswers = settings.showAnswers;
@@ -338,18 +366,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("Please select a span type to start the game.");
                 return;
             }
-            if (!randomMode && rotationMode === 0) {
+            if (!randomMode && rotationMode === 0 && !combinationMode) {
                 alert("Please select at least one movement type.");
                 return;
             }
 
             fullResetGame();
             createCircles();
-            if (rotationMode === 1) {
-                animateCirclesInRotation();
-            } else {
-                animateCircles();
-            }
+            animateCircles();
             if (flashMode) {
                 startFlashMode();
             }
@@ -369,6 +393,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 circle.replaceWith(newCircle);
             });
             velocities = [];
+            angleOffsets = [];
+            speeds = [];
+            directions = [];
         }
 
         function resetGame() {
@@ -385,20 +412,32 @@ document.addEventListener('DOMContentLoaded', () => {
         function createCircles() {
             console.log("Creating circles");
             const totalCircles = currentLevel + randomDistractors;
-
+            let attempts = 0;
             for (let i = 0; i < totalCircles; i++) {
-                const circle = {
-                    x: Math.random() * (canvas.width - 30),
-                    y: Math.random() * (canvas.height - 30 - 80) + 40,
-                    radius: 15,
-                    color: 'blue',
-                    isDistractor: i >= currentLevel,
-                    number: null,
-                    velocity: {
-                        x: (Math.random() * 2 - 1) * speed,
-                        y: (Math.random() * 2 - 1) * speed
+                let circle;
+                do {
+                    if (attempts > 1000) {
+                        console.log('Unable to place circles without overlap');
+                        return;
                     }
-                };
+                    circle = {
+                        x: Math.random() * (canvas.width - 2 * 20) + 20,  // Ensure circle stays within bounds
+                        y: Math.random() * (canvas.height - 2 * 20 - 80) + 20,  // Ensure circle stays within bounds
+                        radius: 20,  // Larger radius
+                        color: 'blue',
+                        isDistractor: i >= currentLevel,
+                        number: null,
+                        velocity: {
+                            x: (Math.random() * 2 - 1) * speed,
+                            y: (Math.random() * 2 - 1) * speed
+                        },
+                        isRotational: false,
+                        angleOffset: 0,
+                        speed: speed * (Math.random() * 1 + 0.5),
+                        direction: Math.random() < 0.5 ? 1 : -1
+                    };
+                    attempts++;
+                } while (checkOverlap(circle, circles));
 
                 if (circle.isDistractor) {
                     circle.color = distractorColors[i % distractorColors.length];
@@ -407,17 +446,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 circles.push(circle);
             }
 
-            if (rotationMode === 1) {
+            if (rotationMode === 1 || combinationMode) {
                 const radius = canvas.width / 2.5; // Reduce the distance from the center
                 const centerX = canvas.width / 2;
                 const centerY = (canvas.height - 80) / 2 + 40;
                 const angleStep = (2 * Math.PI) / circles.length;
                 circles.forEach((circle, index) => {
-                    const angle = index * angleStep;
-                    circle.x = centerX + radius * Math.cos(angle);
-                    circle.y = centerY + radius * Math.sin(angle);
+                    if (combinationMode) {
+                        circle.isRotational = Math.random() < 0.5; // Randomly assign as rotational or not
+                    } else {
+                        circle.isRotational = true;
+                    }
+                    if (circle.isRotational) {
+                        const angle = index * angleStep;
+                        circle.x = centerX + radius * Math.cos(angle);
+                        circle.y = centerY + radius * Math.sin(angle);
+                        circle.angleOffset = angle;
+                    }
                 });
             }
+        }
+
+        function checkOverlap(circle, circles) {
+            return circles.some(existingCircle => {
+                const dx = circle.x - existingCircle.x;
+                const dy = circle.y - existingCircle.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                return distance < circle.radius + existingCircle.radius;
+            });
         }
 
         function draw() {
@@ -429,40 +485,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.fill();
                 if (circle.number !== null) {
                     ctx.fillStyle = 'white';
+                    ctx.font = 'bold 20px Arial';  // Larger and bolder text
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(circle.number, circle.x, circle.y);
                 }
                 ctx.closePath();
 
-                console.log(`Drawing circle ${index} with color ${circle.color}`);
+                if (circle.isRotational) {
+                    // Rotational movement
+                    const radius = canvas.width / 5; // Reduce the distance from the center
+                    const centerX = canvas.width / 2;
+                    const centerY = (canvas.height - 80) / 2 + 40;
+                    circle.angleOffset += circle.speed * 0.01 * circle.direction;
+                    circle.x = centerX + radius * Math.cos(circle.angleOffset);
+                    circle.y = centerY + radius * Math.sin(circle.angleOffset);
+                } else {
+                    // Normal movement
+                    circle.x += circle.velocity.x;
+                    circle.y += circle.velocity.y;
 
-                circle.x += circle.velocity.x;
-                circle.y += circle.velocity.y;
-
-                if (circle.x - circle.radius <= 0 || circle.x + circle.radius >= canvas.width) {
-                    circle.velocity.x *= -1;
-                }
-                if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height - 80) {
-                    circle.velocity.y *= -1;
-                }
-
-                circles.forEach(otherCircle => {
-                    if (circle !== otherCircle) {
-                        const dx = circle.x - otherCircle.x;
-                        const dy = circle.y - otherCircle.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        if (distance < circle.radius + otherCircle.radius) {
-                            const angle = Math.atan2(dy, dx);
-                            const speed1 = Math.sqrt(circle.velocity.x * circle.velocity.x + circle.velocity.y * circle.velocity.y);
-                            const speed2 = Math.sqrt(otherCircle.velocity.x * otherCircle.velocity.x + otherCircle.velocity.y * otherCircle.velocity.y);
-                            circle.velocity.x = speed2 * Math.cos(angle);
-                            circle.velocity.y = speed2 * Math.sin(angle);
-                            otherCircle.velocity.x = speed1 * Math.cos(angle + Math.PI);
-                            otherCircle.velocity.y = speed1 * Math.sin(angle + Math.PI);
-                        }
+                    if (circle.x - circle.radius < 0) {
+                        circle.x = circle.radius;  // Ensure circle stays within bounds
+                        circle.velocity.x *= -1;
                     }
-                });
+                    if (circle.x + circle.radius > canvas.width) {
+                        circle.x = canvas.width - circle.radius;  // Ensure circle stays within bounds
+                        circle.velocity.x *= -1;
+                    }
+                    if (circle.y - circle.radius < 40) {
+                        circle.y = 40 + circle.radius;  // Ensure circle stays within bounds
+                        circle.velocity.y *= -1;
+                    }
+                    if (circle.y + circle.radius > canvas.height - 80) {
+                        circle.y = canvas.height - 80 - circle.radius;  // Ensure circle stays within bounds
+                        circle.velocity.y *= -1;
+                    }
+
+                    circles.forEach(otherCircle => {
+                        if (circle !== otherCircle) {
+                            const dx = circle.x - otherCircle.x;
+                            const dy = circle.y - otherCircle.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            if (distance < circle.radius + otherCircle.radius) {
+                                const angle = Math.atan2(dy, dx);
+                                const speed1 = Math.sqrt(circle.velocity.x * circle.velocity.x + circle.velocity.y * circle.velocity.y);
+                                const speed2 = Math.sqrt(otherCircle.velocity.x * otherCircle.velocity.x + otherCircle.velocity.y * otherCircle.velocity.y);
+                                circle.velocity.x = speed2 * Math.cos(angle);
+                                circle.velocity.y = speed2 * Math.sin(angle);
+                                otherCircle.velocity.x = speed1 * Math.cos(angle + Math.PI);
+                                otherCircle.velocity.y = speed1 * Math.sin(angle + Math.PI);
+                            }
+                        }
+                    });
+                }
             });
         }
 
@@ -470,45 +546,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Animating circles");
             function loop() {
                 draw();
-                animationInterval = requestAnimationFrame(loop);
-            }
-            loop();
-        }
-
-        function animateCirclesInRotation() {
-            console.log("Animating circles in rotation");
-            const radius = canvas.width / 5; // Reduce the distance from the center
-            const centerX = canvas.width / 2;
-            const centerY = (canvas.height - 80) / 2 + 40;
-            const groups = parseInt(settings.rotationGroups, 10);
-            const groupRadiusIncrement = canvas.width / 15; // Add more space between groups
-            let angleOffsets = Array(groups).fill(0);
-            const speeds = Array.from({ length: groups }, () => speed * (Math.random() * 1 + 0.5));
-            const directions = Array.from({ length: groups }, () => Math.random() < 0.5 ? 1 : -1);
-
-            function loop() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                circles.forEach((circle, index) => {
-                    const group = index % groups;
-                    const groupRadius = radius + group * groupRadiusIncrement;
-                    const angleStep = (2 * Math.PI) / Math.ceil(circles.length / groups);
-                    const angle = angleOffsets[group] * directions[group] + (index / groups) * angleStep;
-                    circle.x = centerX + groupRadius * Math.cos(angle);
-                    circle.y = centerY + groupRadius * Math.sin(angle);
-
-                    ctx.beginPath();
-                    ctx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
-                    ctx.fillStyle = circle.color;
-                    ctx.fill();
-                    if (circle.number !== null) {
-                        ctx.fillStyle = 'white';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(circle.number, circle.x, circle.y);
-                    }
-                    ctx.closePath();
-                });
-                angleOffsets = angleOffsets.map((offset, group) => offset + speeds[group] * 0.01);
                 animationInterval = requestAnimationFrame(loop);
             }
             loop();
@@ -525,14 +562,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (selected > 0) {
                     const previousCircle = circles[sequence[selected - 1]];
                     previousCircle.number = null;
-                    previousCircle.color = 'blue';
-                    console.log(`Circle ${sequence[selected - 1]} set to blue`);
+                    previousCircle.color = previousCircle.originalColor || 'blue';
+                    console.log(`Circle ${sequence[selected - 1]} set to original color`);
                 }
                 if (selected < currentLevel) {
                     let index;
                     do {
                         index = Math.floor(Math.random() * circles.length);
                     } while (sequence.includes(index) || circles[index].isDistractor);
+                    circles[index].originalColor = circles[index].color; // Store the original color
                     circles[index].color = 'red';
                     circles[index].number = numbers[selected];
                     displayedNumbers.push(numbers[selected]);
@@ -547,16 +585,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (flashMode) {
                         clearInterval(flashInterval);
                         circles.forEach(circle => {
-                            circle.visible = true;
+                            circle.color = circle.originalColor; // Reset to original color
+                            circle.visible = true; // Ensure all circles are visible
                         });
+                        draw(); // Redraw circles with visibility ensured
                     }
                     circles.forEach(circle => circle.velocity = { x: 0, y: 0 });
         
                     if (selected > 0) {
                         const lastCircle = circles[sequence[selected - 1]];
                         lastCircle.number = null;
-                        lastCircle.color = 'blue';
-                        console.log(`Last Circle ${sequence[selected - 1]} set to blue`);
+                        lastCircle.color = lastCircle.originalColor || 'blue';
+                        console.log(`Last Circle ${sequence[selected - 1]} set to original color`);
                     }
         
                     // Redraw the canvas after updating the circle states
@@ -567,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
             selectNext();
-        }        
+        }
         
 
         function handleCanvasClick(event) {
@@ -761,7 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
             flashInterval = setInterval(() => {
                 const numCirclesToFlash = Math.floor(Math.random() * (circles.length / 2)) + 1;
                 const circlesToFlash = [];
-
+        
                 for (let i = 0; i < numCirclesToFlash; i++) {
                     let randomIndex;
                     do {
@@ -769,15 +809,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     } while (circlesToFlash.includes(randomIndex));
                     circlesToFlash.push(randomIndex);
                 }
-
+        
                 circlesToFlash.forEach(index => {
                     const circle = circles[index];
-                    const originalColor = circle.color;
-
+                    circle.originalColor = circle.color; // Store the original color
                     circle.color = 'transparent';
-
+        
                     setTimeout(() => {
-                        circle.color = originalColor;
+                        circle.color = circle.originalColor;
+                        draw(); // Redraw each time a circle reverts to original color
                     }, 500);
                 });
             }, 2000);

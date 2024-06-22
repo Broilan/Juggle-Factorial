@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function startGame() {
             document.getElementById('title').style.display = 'none';
-            const stopBtn = document.getElementById("stopBtn").style.display = "block";
+            document.getElementById("stopBtn").style.display = "block";
             document.getElementById("settingsBtn").style.display = "none";
             document.getElementById("infoBtn").style.display = "none";
 
@@ -537,9 +537,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     circles[index].number = numbers[selected];
                     displayedNumbers.push(numbers[selected]);
                     sequence.push(index);
-
+        
                     console.log(`Circle ${index} set to red with number ${numbers[selected]}`);
-
+        
                     selected++;
                     setTimeout(selectNext, selectTime);
                 } else {
@@ -551,20 +551,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     }
                     circles.forEach(circle => circle.velocity = { x: 0, y: 0 });
-
+        
                     if (selected > 0) {
                         const lastCircle = circles[sequence[selected - 1]];
                         lastCircle.number = null;
                         lastCircle.color = 'blue';
                         console.log(`Last Circle ${sequence[selected - 1]} set to blue`);
                     }
-
+        
+                    // Redraw the canvas after updating the circle states
+                    draw();
+        
                     startTimer();
                     canvas.addEventListener('click', handleCanvasClick);
                 }
             };
             selectNext();
-        }
+        }        
+        
 
         function handleCanvasClick(event) {
             const rect = canvas.getBoundingClientRect();

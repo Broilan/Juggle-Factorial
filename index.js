@@ -77,6 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function applySettings() {
+    
+            // Add event listener for window resize
+            window.addEventListener('resize', checkScreenSize);
             console.log("Applying settings:", settings);
             document.getElementById('forwards-btn').checked = settings.spanTypes.forwards;
             document.getElementById('backwards-btn').checked = settings.spanTypes.backwards;
@@ -98,6 +101,17 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('rotation-groups-input').value = settings.rotationGroups;
 
             toggleRotationGroupsInput(settings.movementTypes.rotation);
+
+            function checkScreenSize() {
+                const rotationBtn = document.getElementById('rotation-btn');
+                if (window.matchMedia("(max-width: 1024px)").matches) {
+                    rotationBtn.disabled = true;
+                    document.getElementById("rotation-btn-tooltip").textContent = "Unavailable on this device.";
+                } else {
+                    rotationBtn.disabled = false;
+                }
+            }
+            checkScreenSize();
         }
 
         function saveSettings() {
@@ -162,11 +176,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             normalBox.onclick = () => {
                 rotationBox.checked = false;
+                settings.rotationGroups = 0;
                 toggleRotationGroupsInput(false);
             };
 
             rotationBox.onclick = () => {
                 normalBox.checked = false;
+                settings.rotationGroups = 1;
                 toggleRotationGroupsInput(true);
             };
 
@@ -397,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (rotationMode === 1) {
-                const radius = canvas.width / 2.5;
+                const radius = canvas.width / 2.5; // Reduce the distance from the center
                 const centerX = canvas.width / 2;
                 const centerY = (canvas.height - 80) / 2 + 40;
                 const angleStep = (2 * Math.PI) / circles.length;
@@ -466,11 +482,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function animateCirclesInRotation() {
             console.log("Animating circles in rotation");
-            const radius = canvas.width / 2.5;
+            const radius = canvas.width / 5; // Reduce the distance from the center
             const centerX = canvas.width / 2;
             const centerY = (canvas.height - 80) / 2 + 40;
             const groups = parseInt(settings.rotationGroups, 10);
-            const groupRadiusIncrement = canvas.width / 20;
+            const groupRadiusIncrement = canvas.width / 15; // Add more space between groups
             let angleOffsets = Array(groups).fill(0);
             const speeds = Array.from({ length: groups }, () => speed * (Math.random() * 1 + 0.5));
             const directions = Array.from({ length: groups }, () => Math.random() < 0.5 ? 1 : -1);
@@ -502,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             loop();
         }
-        
+
         function selectCircles() {
             console.log("Selecting circles");
             let selected = 0;

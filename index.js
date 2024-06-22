@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 normalBox.checked = false;
                 rotationBox.checked = false;
                 settings.rotationGroups = 1;
-                toggleRotationGroupsInput(true);
+                toggleRotationGroupsInput(false);
             };
 
             if (!normalBox.checked && !rotationBox.checked && !combinationBox.checked) {
@@ -205,7 +205,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 normalBox.checked = true;
                 rotationBox.checked = false;
                 combinationBox.checked = false;
-            };
+            } else if (normalBox.checked && combinationBox.checked) {
+                normalBox.checked = true;
+                rotationBox.checked = false;
+                combinationBox.checked = false;
+            } else if (rotationBox.checked && combinationBox.checked) {
+                normalBox.checked = false;
+                rotationBox.checked = true;
+                combinationBox.checked = false;
+            }
 
         }
 
@@ -318,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let flashMode = settings.flashMode;
         let autoProgression = settings.autoProgression;
         let showAnswers = settings.showAnswers;
-        let distractorColors = ['orange', 'pink', 'purple', 'brown', 'cyan', 'gray'];
+        let distractorColors = ['orange', 'pink', 'purple', 'brown', 'gray'];
         let levelHistory = [];
         let velocities = [];
         let angleOffsets = [];
@@ -404,24 +412,32 @@ document.addEventListener('DOMContentLoaded', () => {
         function createCircles() {
             console.log("Creating circles");
             const totalCircles = currentLevel + randomDistractors;
-
+            let attempts = 0;
             for (let i = 0; i < totalCircles; i++) {
-                const circle = {
-                    x: Math.random() * (canvas.width - 2 * 20) + 20,  // Ensure circle stays within bounds
-                    y: Math.random() * (canvas.height - 2 * 20 - 80) + 20,  // Ensure circle stays within bounds
-                    radius: 20,  // Larger radius
-                    color: 'blue',
-                    isDistractor: i >= currentLevel,
-                    number: null,
-                    velocity: {
-                        x: (Math.random() * 2 - 1) * speed,
-                        y: (Math.random() * 2 - 1) * speed
-                    },
-                    isRotational: false,
-                    angleOffset: 0,
-                    speed: speed * (Math.random() * 1 + 0.5),
-                    direction: Math.random() < 0.5 ? 1 : -1
-                };
+                let circle;
+                do {
+                    if (attempts > 1000) {
+                        console.log('Unable to place circles without overlap');
+                        return;
+                    }
+                    circle = {
+                        x: Math.random() * (canvas.width - 2 * 20) + 20,  // Ensure circle stays within bounds
+                        y: Math.random() * (canvas.height - 2 * 20 - 80) + 20,  // Ensure circle stays within bounds
+                        radius: 20,  // Larger radius
+                        color: 'blue',
+                        isDistractor: i >= currentLevel,
+                        number: null,
+                        velocity: {
+                            x: (Math.random() * 2 - 1) * speed,
+                            y: (Math.random() * 2 - 1) * speed
+                        },
+                        isRotational: false,
+                        angleOffset: 0,
+                        speed: speed * (Math.random() * 1 + 0.5),
+                        direction: Math.random() < 0.5 ? 1 : -1
+                    };
+                    attempts++;
+                } while (checkOverlap(circle, circles));
 
                 if (circle.isDistractor) {
                     circle.color = distractorColors[i % distractorColors.length];
@@ -449,6 +465,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
+        }
+
+        function checkOverlap(circle, circles) {
+            return circles.some(existingCircle => {
+                const dx = circle.x - existingCircle.x;
+                const dy = circle.y - existingCircle.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                return distance < circle.radius + existingCircle.radius;
+            });
         }
 
         function draw() {
@@ -537,14 +562,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (selected > 0) {
                     const previousCircle = circles[sequence[selected - 1]];
                     previousCircle.number = null;
-                    previousCircle.color = 'blue';
-                    console.log(`Circle ${sequence[selected - 1]} set to blue`);
+                    previousCircle.color = previousCircle.originalColor || 'blue';
+                    console.log(`Circle ${sequence[selected - 1]} set to original color`);
                 }
                 if (selected < currentLevel) {
                     let index;
                     do {
                         index = Math.floor(Math.random() * circles.length);
                     } while (sequence.includes(index) || circles[index].isDistractor);
+                    circles[index].originalColor = circles[index].color; // Store the original color
                     circles[index].color = 'red';
                     circles[index].number = numbers[selected];
                     displayedNumbers.push(numbers[selected]);
@@ -559,16 +585,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (flashMode) {
                         clearInterval(flashInterval);
                         circles.forEach(circle => {
-                            circle.visible = true;
+                            circle.color = circle.originalColor; // Reset to original color
+                            circle.visible = true; // Ensure all circles are visible
                         });
+                        draw(); // Redraw circles with visibility ensured
                     }
                     circles.forEach(circle => circle.velocity = { x: 0, y: 0 });
         
                     if (selected > 0) {
                         const lastCircle = circles[sequence[selected - 1]];
                         lastCircle.number = null;
-                        lastCircle.color = 'blue';
-                        console.log(`Last Circle ${sequence[selected - 1]} set to blue`);
+                        lastCircle.color = lastCircle.originalColor || 'blue';
+                        console.log(`Last Circle ${sequence[selected - 1]} set to original color`);
                     }
         
                     // Redraw the canvas after updating the circle states
@@ -579,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
             selectNext();
-        }        
+        }
         
 
         function handleCanvasClick(event) {
@@ -773,7 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
             flashInterval = setInterval(() => {
                 const numCirclesToFlash = Math.floor(Math.random() * (circles.length / 2)) + 1;
                 const circlesToFlash = [];
-
+        
                 for (let i = 0; i < numCirclesToFlash; i++) {
                     let randomIndex;
                     do {
@@ -781,15 +809,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     } while (circlesToFlash.includes(randomIndex));
                     circlesToFlash.push(randomIndex);
                 }
-
+        
                 circlesToFlash.forEach(index => {
                     const circle = circles[index];
-                    const originalColor = circle.color;
-
+                    circle.originalColor = circle.color; // Store the original color
                     circle.color = 'transparent';
-
+        
                     setTimeout(() => {
-                        circle.color = originalColor;
+                        circle.color = circle.originalColor;
+                        draw(); // Redraw each time a circle reverts to original color
                     }, 500);
                 });
             }, 2000);

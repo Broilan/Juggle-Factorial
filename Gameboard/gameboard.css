@@ -185,6 +185,39 @@ i:hover {
     overflow: hidden;
 }
 
+.custom-alert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 5s;
+    pointer-events: none;
+}
+
+.custom-alert-success {
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: rgba(0, 255, 0, 0.3);
+    z-index: 1000;
+}
+
+.custom-alert-failure {
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+
 @media (max-width: 750px) {
     #info {
         font-size: 2.5vw;

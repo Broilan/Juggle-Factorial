@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalCircles = level + randomDistractors;
             const requiredCircles = rotationGroups * 8;
 
-            if (settings.movementTypes.rotation && totalCircles < requiredCircles) {
+            if (settings.movementTypes.rotation && totalCircles < requiredCircles && document.getElementById('rotation-btn').checked === true) {
                 alert(`Minimum of ${requiredCircles} total balls required for rotation mode with ${rotationGroups} groups.`);
                 return;
             }
@@ -600,6 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Checking sequence");
             let correct = true;
             let correctSequence;
+            
             if (spanModes.sequencing) {
                 let sortedSequence = displayedNumbers.slice().sort((a, b) => a - b);
                 if (spanModes.backwards) {
@@ -620,21 +621,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-
+        
             if (correct) {
-                alert('Correct! Proceeding to the next level.');
-                levelHistory.push(currentLevel);
-                updateAverageLevel();
-                if (autoProgression) {
-                    currentLevel++;
-                }
-                settings.level = currentLevel;
-                localStorage.setItem('settings', JSON.stringify(settings));
-                startGame();
+                showCustomAlert('success', 'Success! Incrementing level.', () => {
+                    levelHistory.push(currentLevel);
+                    updateAverageLevel();
+                    if (autoProgression) {
+                        currentLevel++;
+                    }
+                    settings.level = currentLevel;
+                    localStorage.setItem('settings', JSON.stringify(settings));
+                    startGame();
+                });
             } else {
                 if (showAnswers) {
-                    alert('Incorrect. Showing correct sequence.');
-                    showCorrectSequence(() => {
+                    showCustomAlert('failure', 'Incorrect. Decrementing level.', () => {
+                        showCorrectSequence(() => {
+                            levelHistory.push(currentLevel);
+                            updateAverageLevel();
+                            if (autoProgression) {
+                                currentLevel = Math.max(1, currentLevel - 1);
+                            }
+                            settings.level = currentLevel;
+                            localStorage.setItem('settings', JSON.stringify(settings));
+                            startGame();
+                        });
+                    });
+                } else {
+                    showCustomAlert('failure', 'Incorrect. Decrementing level.', () => {
                         levelHistory.push(currentLevel);
                         updateAverageLevel();
                         if (autoProgression) {
@@ -644,20 +658,42 @@ document.addEventListener('DOMContentLoaded', () => {
                         localStorage.setItem('settings', JSON.stringify(settings));
                         startGame();
                     });
-                } else {
-                    alert('Incorrect. Proceeding to the next level.');
-                    levelHistory.push(currentLevel);
-                    updateAverageLevel();
-                    if (autoProgression) {
-                        currentLevel = Math.max(1, currentLevel - 1);
-                    }
-                    settings.level = currentLevel;
-                    localStorage.setItem('settings', JSON.stringify(settings));
-                    startGame();
                 }
             }
         }
-
+        
+        function showCustomAlert(type, message, callback) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'custom-alert';
+        
+            if (type === 'success') {
+                alertDiv.innerHTML = `
+                    <div class="custom-alert-success">
+                        <p>${message}</p>
+                    </div>`;
+            } else if (type === 'failure') {
+                alertDiv.innerHTML = `
+                    <div class="custom-alert-failure">
+                        <p>${message}</p>
+                    </div>`;
+            }
+        
+            document.body.appendChild(alertDiv);
+            alertDiv.style.opacity = 1;
+            alertDiv.style.pointerEvents = 'auto';
+        
+            // Fade-out after 2-3 seconds
+            setTimeout(() => {
+                alertDiv.style.opacity = 0;
+                alertDiv.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    document.body.removeChild(alertDiv);
+                    if (callback) callback();
+                }, 2000); // Remove from DOM after transition
+            }, 2000); // Keep the alert visible for 2 seconds before fading out
+        }
+        
+        
         function showCorrectSequence(callback) {
             console.log("Showing correct sequence");
             sequence.forEach((index, i) => {

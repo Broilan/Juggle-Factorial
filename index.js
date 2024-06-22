@@ -696,15 +696,26 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function showCorrectSequence(callback) {
             console.log("Showing correct sequence");
+            console.log("Sequence: ", sequence);
+            console.log("Displayed Numbers: ", displayedNumbers);
+        
             sequence.forEach((index, i) => {
                 circles[index].number = displayedNumbers[i];
                 circles[index].color = 'green';
             });
+        
+            // Redraw circles to display the correct sequence
+            draw();
+        
             setTimeout(() => {
                 sequence.forEach(index => {
                     circles[index].number = null;
                     circles[index].color = 'blue';
                 });
+        
+                // Redraw circles to clear the sequence display
+                draw();
+        
                 callback();
             }, 3000);
         }

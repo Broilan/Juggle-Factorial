@@ -20,18 +20,24 @@
             <h3>Click to Begin</h3>
               </div>
 
-            <div id="info">
+            <div id="info" >
                 <div id="level-display">Lvl: 3</div>
                 <div id="timer-display">30s</div>
                 <div id="average-level-display">Avg: 3</div>
             </div>
             <canvas id="gameCanvas" width="800" height="800"></canvas>
+            
             <div id="button-container">
-                <div id="sub-button-container">
-                    <i id="infoBtn" class="fas fa-book"></i>  
+                <div class="tooltip">
                     <i id="settingsBtn" class="fas fa-cog"></i>
+                    <span class="tooltiptext">Settings</span>
                 </div>
-                <button id="start-btn">start</button>
+                <div class="tooltip">
+                    <i id="infoBtn" class="fas fa-book"></i>  
+                    <span class="tooltiptext">Guide</span>
+                </div>
+                    <i id="stopBtn" class="fas fa-times"></i>
+
             </div>
         </div>
     </div>

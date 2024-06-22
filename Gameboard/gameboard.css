@@ -90,40 +90,26 @@ a {
 }
 
 #button-container {
-    display: flex;
-    align-items: center;
+    display: flex; 
+    flex-direction: row;
     justify-content: center;
-    width: 100%;
-    position: absolute;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    bottom: 0;
-    border-top: 1px solid #000;
-    z-index: 1;
-}
-
-#sub-button-container {
-    flex: column;
-    display: flex;
-    flex-direction: column-reverse;
+    align-items: center;
     gap: 5px;
-    font-size: 1.2rem;
-    margin-left: 5px;
+    width: fit-content;
+    position: absolute;
+    left: 0.5%;
+    bottom: 0%;
+    z-index: 1;
+    font-size: 1.5vw;
 }
 
-#start-btn {
-    background-color: #4CAF50;
-    color: white;
-    font-size: large;
-    padding: 15px 20px;
-    text-align: center;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
+#stopBtn {
+    display: none;
+
+}
+
+i:hover {
     cursor: pointer;
-    display: inline-block;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .instructions-modal {
@@ -206,5 +192,9 @@ a {
 
     #title {
         font-size: 3vw;
+    }
+
+    #button-container {
+        font-size: 6vw;
     }
 }

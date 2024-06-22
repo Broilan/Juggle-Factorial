@@ -77,9 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function applySettings() {
-    
-            // Add event listener for window resize
-            window.addEventListener('resize', checkScreenSize);
             console.log("Applying settings:", settings);
             document.getElementById('forwards-btn').checked = settings.spanTypes.forwards;
             document.getElementById('backwards-btn').checked = settings.spanTypes.backwards;
@@ -101,6 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('rotation-groups-input').value = settings.rotationGroups;
 
             toggleRotationGroupsInput(settings.movementTypes.rotation);
+
+            // Add event listener for window resize
+            window.addEventListener('resize', checkScreenSize);
 
             function checkScreenSize() {
                 const rotationBtn = document.getElementById('rotation-btn');
@@ -244,7 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const startBtn = document.getElementById('start-btn');
         const levelDisplay = document.getElementById('level-display');
         const timerDisplay = document.getElementById('timer-display');
         const averageLevelDisplay = document.getElementById('average-level-display');
@@ -306,18 +305,18 @@ document.addEventListener('DOMContentLoaded', () => {
         let levelHistory = [];
         let velocities = [];
 
-        if (startBtn) {
-            startBtn.addEventListener('click', () => {
-                settings = getSettings();
-                if (settings) startGame();
-            });
-        } else {
-            console.error('Start button not found');
-        }
+        canvas.addEventListener('click', startGame, { once: true });
+
 
         function startGame() {
-            console.log("Game started");
             document.getElementById('title').style.display = 'none';
+            const stopBtn = document.getElementById("stopBtn").style.display = "block";
+            document.getElementById("settingsBtn").style.display = "none";
+            document.getElementById("infoBtn").style.display = "none";
+
+            document.getElementById("stopBtn").onclick = () => {
+                endGame();
+            };
 
             settings = getSettings();
             if (!settings) return;
@@ -343,10 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("Please select at least one movement type.");
                 return;
             }
-
-            startBtn.textContent = 'Stop';
-            startBtn.style.backgroundColor = 'red';
-            startBtn.onclick = () => endGame();
 
             fullResetGame();
             createCircles();

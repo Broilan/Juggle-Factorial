@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
             displayedNumbers = [];
             userSequence = [];
             timerDisplay.textContent = `${timeLeft}s`;
-            levelDisplay.textContent = `Level: ${currentLevel}`;
+            levelDisplay.textContent = `Lvl: ${currentLevel}`;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 

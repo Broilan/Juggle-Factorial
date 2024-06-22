@@ -50,13 +50,14 @@ a {
     font-family: 'Press Start 2P', cursive;
     z-index: 20;
     text-align: center;
-    font-size: 2rem;
+    font-size: 200%;
     color: black;
     pointer-events: none; /* So that clicks pass through to the canvas */
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+    font-family: 'Press Start 2P', cursive;
 }
 
 #info {
@@ -73,7 +74,7 @@ a {
     left: 0;
     right: 0;
     z-index: 1;
-    font-size: 1rem;
+    font-size: 100%;
 }
 
 #level-display, #timer-display, #average-level-display {
@@ -82,8 +83,10 @@ a {
     padding: 8px 16px;
     border-radius: 12px;
     flex: 1;
+    white-space: nowrap;
     text-align: center;
     border: 4px solid #2a2a2a;
+    font-family: 'Press Start 2P', cursive;
 }
 
 #button-container {
@@ -194,4 +197,14 @@ a {
 /* Disable body scroll when modal is open */
 .no-scroll {
     overflow: hidden;
+}
+
+@media (max-width: 750px) {
+    #info {
+        font-size: 2.5vw;
+    }
+
+    #title {
+        font-size: 3vw;
+    }
 }

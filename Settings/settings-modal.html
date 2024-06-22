@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings Modal with Tooltips</title>
+    <link rel="stylesheet" href="settings-modal.css">
+</head>
+<body>
+    <form id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h1>Settings</h1>
+            <span class="close" id="closeBtn">&times;</span>
+
+            <div id="checkbox-controls">
+                <label for="span-select">Span Types</label>
+                <div class="select-checkboxes" id="span-select">
+                    <div class="tooltip">
+                        <input type="checkbox" id="forwards-btn">Forward
+                        <span class="tooltiptext">Return numbers ascendingly</span>
+                    </div>
+                    <div class="tooltip">
+                        <input type="checkbox" id="backwards-btn">Backwards
+                        <span class="tooltiptext">Return numbers descendingly</span>
+                    </div>
+                    <div class="tooltip">
+                        <input type="checkbox" id="sequencing-btn">Sequencing
+                        <span class="tooltiptext">Unordered sequences</span>
+                    </div>
+                </div>
+
+                <label for="movement-select">Movement Types</label>
+                <div class="select-checkboxes" id="movement-select">
+                    <div class="tooltip">
+                        <input type="checkbox" id="normal-btn">Normal
+                        <span class="tooltiptext">Balls move randomly</span>
+                    </div>
+                    <div class="tooltip">
+                        <input type="checkbox" id="rotation-btn">Rotation
+                        <span class="tooltiptext" id="rotation-btn-tooltip">Balls rotate about a point</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="button-controls">
+                <div class="tooltip">
+                    <button type="button" id="flash-btn">Flash Mode: Off</button>
+                    <span class="tooltiptext">Balls disappear and reappear</span>
+                </div>
+                <div class="tooltip">
+                    <button type="button" id="progression-btn">Auto Progression: On</button>
+                    <span class="tooltiptext">Automatically regress or progress</span>
+                </div>
+                <div class="tooltip">
+                    <button type="button" id="show-answers-btn">Show Answers: On</button>
+                    <span class="tooltiptext">See answers post-round</span>
+                </div>
+            </div>
+
+            <div id="input-controls">
+                <div class="input tooltip">
+                    <label for="level-input">Level</label>
+                    <input type="number" id="level-input" value="3" min="1" />
+                    <span class="tooltiptext">Number of non-distractor balls</span>
+                </div>
+                <div class="input tooltip">
+                    <label for="timer-input">Timer</label>
+                    <input type="number" id="timer-input" value="30" min="1" />
+                    <span class="tooltiptext">Round duration</span>
+                </div>
+                <div class="input tooltip">
+                    <label for="select-time-input">Select Time (s)</label>
+                    <input type="number" id="select-time-input" value="1" step="0.01" min="0.1" />
+                    <span class="tooltiptext">Seconds/mark</span>
+                </div>
+                <div class="input tooltip">
+                    <label for="random-distractors-input">Distractors</label>
+                    <input type="number" id="random-distractors-input" value="5" min="0" />
+                    <span class="tooltiptext">Number of distractor balls</span>
+                </div>
+                <div class="input tooltip">
+                    <label for="speed-input">Speed</label>
+                    <input type="number" id="speed-input" value="1" step="0.1" min="0.1" />
+                    <span class="tooltiptext">Ball speed</span>
+                </div>
+                <div class="input tooltip">
+                    <label for="delay-input">Delay Time (s)</label>
+                    <input type="number" id="delay-input" value="2" step="0.1" min="0.1" />
+                    <span class="tooltiptext">Interim between ball-freeze and select-time</span>
+                </div>
+                <div class="input tooltip">
+                    <label for="rotation-groups-input">Rotation Groups</label>
+                    <input type="number" id="rotation-groups-input" value="1" min="1" max="4" />
+                    <span class="tooltiptext">Number of rotation groups</span>
+                </div>
+            </div>
+
+            <div id="save-cancel-btns">
+                <div class="tooltip">
+                    <button type="button" id="cancel-btn">Cancel</button>
+                    <span class="tooltiptext">Cancel changes</span>
+                </div>
+                <div class="tooltip">
+                    <button type="button" id="save-btn">Save</button>
+                    <span class="tooltiptext">Save changes</span>
+                </div>
+            </div>
+        </div>
+    </form>
+</body>
+</html>

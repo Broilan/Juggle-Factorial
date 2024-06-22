@@ -1,0 +1,233 @@
+/* Add the following lines to include the "Press Start 2P" font from Google */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+    background-color: #e8f0fe;
+    margin: 0;
+    overflow-y: hidden;
+    padding: 20px;
+    height: 100vh;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+#canvas-container {
+    position: relative;
+    width: 80vw; /* Make it responsive */
+    height: 80vh; /* Make it responsive */
+    max-width: 800px; /* Maximum width */
+    max-height: 800px; /* Maximum height */
+    background-color: #fff;
+    border: 2px solid #000;
+    border-radius: 13px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+
+    display: flex; /* Use flexbox */
+    flex-direction: column; /* Align items vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+}
+
+#title {
+    font-family: 'Press Start 2P', cursive;
+    z-index: 20;
+    text-align: center;
+    font-size: 200%;
+    color: black;
+    pointer-events: none; /* So that clicks pass through to the canvas */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+    font-family: 'Press Start 2P', cursive;
+}
+
+#info {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 5%;
+    border-top-right-radius: 12px;
+    border-top-left-radius: 12px;
+    border: 1px solid #000;
+    background-color: #333;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    font-size: 100%;
+}
+
+#level-display, #timer-display, #average-level-display {
+    background-color: #333;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    flex: 1;
+    white-space: nowrap;
+    text-align: center;
+    border: 4px solid #2a2a2a;
+    font-family: 'Press Start 2P', cursive;
+}
+
+#button-container {
+    display: flex; 
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: fit-content;
+    position: absolute;
+    left: 0.5%;
+    bottom: 0%;
+    z-index: 1;
+    font-size: 1.5vw;
+}
+
+#stopBtn {
+    display: none;
+
+}
+
+i:hover {
+    cursor: pointer;
+}
+
+.instructions-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.instructions-modal-content {
+    background-color: white;
+    padding: 20px;
+    border: 1px solid black;
+    border-radius: 20px;
+    width: 400px;
+    height: 500px;
+    overflow-y: auto;
+    animation: fadeIn 0.5s;
+}
+
+/* Hide scrollbar for Webkit browsers */
+.instructions-modal-content::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.instructions-modal-content {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.instructions-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.instructions-close:hover,
+.instructions-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#settings-scroll {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Book icon styling */
+.icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    font-size: 24px;
+    margin: 0 auto 20px auto;
+}
+
+/* Disable body scroll when modal is open */
+.no-scroll {
+    overflow: hidden;
+}
+
+.custom-alert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 5s;
+    pointer-events: none;
+}
+
+.custom-alert-success {
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: rgba(0, 255, 0, 0.3);
+    z-index: 1000;
+}
+
+.custom-alert-failure {
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+
+@media (max-width: 750px) {
+    #info {
+        font-size: 2.5vw;
+    }
+
+    #title {
+        font-size: 3vw;
+    }
+
+    #button-container {
+        font-size: 6vw;
+    }
+}

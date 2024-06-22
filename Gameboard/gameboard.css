@@ -1,17 +1,89 @@
+/* Add the following lines to include the "Press Start 2P" font from Google */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     font-family: Arial, sans-serif;
     background-color: #e8f0fe;
     margin: 0;
+    overflow-y: hidden;
     padding: 20px;
-    overflow: hidden;
+    height: 100vh;
 }
 
 a {
     text-decoration: none;
     color: black;
+}
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+#canvas-container {
+    position: relative;
+    width: 80vw; /* Make it responsive */
+    height: 80vh; /* Make it responsive */
+    max-width: 800px; /* Maximum width */
+    max-height: 800px; /* Maximum height */
+    background-color: #fff;
+    border: 2px solid #000;
+    border-radius: 13px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+
+    display: flex; /* Use flexbox */
+    flex-direction: column; /* Align items vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+}
+
+#title {
+    font-family: 'Press Start 2P', cursive;
+    z-index: 20;
+    text-align: center;
+    font-size: 2rem;
+    color: black;
+    pointer-events: none; /* So that clicks pass through to the canvas */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+}
+
+#info {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 5%;
+    border-top-right-radius: 12px;
+    border-top-left-radius: 12px;
+    border: 1px solid #000;
+    background-color: #333;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    font-size: 1rem;
+}
+
+#level-display, #timer-display, #average-level-display {
+    background-color: #333;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    flex: 1;
+    text-align: center;
+    border: 4px solid #2a2a2a;
 }
 
 #button-container {
@@ -34,9 +106,9 @@ a {
     gap: 5px;
     font-size: 1.2rem;
     margin-left: 5px;
- }
+}
 
- #start-btn {
+#start-btn {
     background-color: #4CAF50;
     color: white;
     font-size: large;
@@ -50,8 +122,6 @@ a {
     margin-left: auto;
     margin-right: auto;
 }
-
-
 
 .instructions-modal {
     display: none;
@@ -124,68 +194,4 @@ a {
 /* Disable body scroll when modal is open */
 .no-scroll {
     overflow: hidden;
-}
-
-#game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 1000px;
-}
-
-#canvas-container {
-    position: relative;
-    width: 80vw; /* Make it responsive */
-    height: 80vh; /* Make it responsive */
-    max-width: 800px; /* Maximum width */
-    max-height: 800px; /* Maximum height */
-    background-color: #fff;
-    border: 2px solid #000;
-    border-radius: 13px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-}
-
-i {
-    cursor: pointer;
-}
-
-
-.header {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.input {
-    margin-left: 20px;
-    font-size: 14px;
-}
-
-#info {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    height: 5%;
-    border-top-right-radius: 12px;
-    border-top-left-radius: 12px;
-    border: 1px solid #000;
-    background-color: #333;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1;
-    font-size: 1rem;
-}
-
-#level-display, #timer-display, #average-level-display {
-    background-color: #333;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 12px;
-    flex: 1;
-    text-align: center;
-    border: 4px solid #2a2a2a;
 }

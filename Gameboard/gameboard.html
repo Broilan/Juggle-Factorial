@@ -7,12 +7,16 @@
     <link rel="stylesheet" href="../Settings/settings-modal.css">
     <link rel="stylesheet" href="./gameboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Include the "Press Start 2P" font from Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h2 class="header">Jiggle Factorial</h2>
 
     <div id="game-container">
         <div id="canvas-container">
+            <!-- Title Element -->
+            <div id="title">Jiggle<br>Factorial</div>
+
             <div id="info">
                 <div id="level-display">Level: 3</div>
                 <div id="timer-display">30s</div>
@@ -21,8 +25,8 @@
             <canvas id="gameCanvas" width="800" height="800"></canvas>
             <div id="button-container">
                 <div id="sub-button-container">
-                <i id="infoBtn" class="fas fa-book"></i>  
-                <i id="settingsBtn" class="fas fa-cog"></i>
+                    <i id="infoBtn" class="fas fa-book"></i>  
+                    <i id="settingsBtn" class="fas fa-cog"></i>
                 </div>
                 <button id="start-btn">start</button>
             </div>

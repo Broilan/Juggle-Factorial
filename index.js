@@ -258,6 +258,7 @@ console.error('Start button not found');
 
 function startGame() {
 console.log("Game started");
+document.getElementById('title').style.display = 'none';
 
 settings = getSettings();
 if (!settings) return;

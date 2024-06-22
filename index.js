@@ -307,7 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         canvas.addEventListener('click', startGame, { once: true });
 
-
         function startGame() {
             document.getElementById('title').style.display = 'none';
             document.getElementById("stopBtn").style.display = "block";
@@ -388,9 +387,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (let i = 0; i < totalCircles; i++) {
                 const circle = {
-                    x: Math.random() * (canvas.width - 30),
-                    y: Math.random() * (canvas.height - 30 - 80) + 40,
-                    radius: 15,
+                    x: Math.random() * (canvas.width - 2 * 20) + 20,  // Ensure circle stays within bounds
+                    y: Math.random() * (canvas.height - 2 * 20 - 80) + 20,  // Ensure circle stays within bounds
+                    radius: 20,  // Larger radius
                     color: 'blue',
                     isDistractor: i >= currentLevel,
                     number: null,
@@ -429,6 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.fill();
                 if (circle.number !== null) {
                     ctx.fillStyle = 'white';
+                    ctx.font = 'bold 20px Arial';  // Larger and bolder text
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(circle.number, circle.x, circle.y);
@@ -440,10 +440,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 circle.x += circle.velocity.x;
                 circle.y += circle.velocity.y;
 
-                if (circle.x - circle.radius <= 0 || circle.x + circle.radius >= canvas.width) {
+                if (circle.x - circle.radius < 0) {
+                    circle.x = circle.radius;  // Ensure circle stays within bounds
                     circle.velocity.x *= -1;
                 }
-                if (circle.y - circle.radius <= 40 || circle.y + circle.radius >= canvas.height - 80) {
+                if (circle.x + circle.radius > canvas.width) {
+                    circle.x = canvas.width - circle.radius;  // Ensure circle stays within bounds
+                    circle.velocity.x *= -1;
+                }
+                if (circle.y - circle.radius < 40) {
+                    circle.y = 40 + circle.radius;  // Ensure circle stays within bounds
+                    circle.velocity.y *= -1;
+                }
+                if (circle.y + circle.radius > canvas.height - 80) {
+                    circle.y = canvas.height - 80 - circle.radius;  // Ensure circle stays within bounds
                     circle.velocity.y *= -1;
                 }
 
@@ -502,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ctx.fill();
                     if (circle.number !== null) {
                         ctx.fillStyle = 'white';
+                        ctx.font = 'bold 20px Arial';  // Larger and bolder text
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillText(circle.number, circle.x, circle.y);

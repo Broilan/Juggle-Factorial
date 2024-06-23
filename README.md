@@ -6,8 +6,8 @@ Jiggle Factorial is a JavaScript-based game designed to mimic Brain HQ's "Juggle
 
 1. **Select Settings**: Choose your desired settings and save them.
 2. **Start the Game**: Click start to begin the game.
-3. **Observe the Balls**: You'll see a set of uniquely colored balls. Some balls will be marked with numbers one at a time before reverting to their original state.
-4. **Select the Balls**: After a while, the balls will freeze. Select them according to the span type you selected (forwards or backwards).
+3. **Observe the Balls**: You'll see a set of uniquely colored balls, and some will be marked with numbers, one at a time, before reverting to their original state.
+4. **Select the Balls**: After some time, the balls will freeze, and you'll select them according to whether you've selected the forwards or backwards span.
 5. **Advance Levels**: After selecting the balls, a new, performance-adjusted level will begin.
 
 ## Settings

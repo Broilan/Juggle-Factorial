@@ -109,12 +109,12 @@
         }
     
         // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-            if (event.target == infoModal) {
-                infoModal.style.display = "none";
-                document.body.classList.remove('no-scroll'); // Enable body scroll
+        window.addEventListener('click', function(event) {
+            if (event.target === infoModal) {
+            infoModal.style.display = "none";
+            document.body.classList.remove('no-scroll'); // Enable body scroll
             }
-        }
+        });
 
         // Adjust canvas size
         function resizeCanvas() {

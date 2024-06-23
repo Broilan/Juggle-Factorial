@@ -494,22 +494,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 const centerX = canvas.width / 2;
                 const centerY = (canvas.height - 80) / 2 + 40;
                 const baseRadiusSpacing = circles[0].radius * 4;
-        
+                const maxRadius = Math.min(centerX, centerY - 40); // Limit the maximum radius to fit within the canvas
+
                 let circleIndex = 0;
+                let currentRingRadius = baseRadiusSpacing;
                 const circlesPerGroup = Math.ceil(totalCircles / groups);
-        
+
                 for (let g = 1; g <= groups; g++) {
-                    const currentRingRadius = baseRadiusSpacing * g;
-                    const circumference = 2 * Math.PI * currentRingRadius;
-                    const circlesInRing = Math.min(Math.floor(circumference / (2 * circles[0].radius)), circlesPerGroup);
-                    const angleStep = (2 * Math.PI) / circlesInRing;
-        
+                    let circlesInRing = 0;
+                    let circumference = 0;
+                    let angleStep = 0;
+
+                    while (circlesInRing < circlesPerGroup && currentRingRadius < maxRadius) {
+                        circumference = 2 * Math.PI * currentRingRadius;
+                        circlesInRing = Math.min(Math.floor(circumference / (2 * circles[0].radius)), circlesPerGroup);
+                        angleStep = (2 * Math.PI) / circlesInRing;
+                        if (circlesInRing < circlesPerGroup) {
+                            currentRingRadius += baseRadiusSpacing;
+                        }
+                    }
+
+                    const direction = g % 2 === 0 ? -1 : 1; // Alternate direction for each group
+
                     for (let i = 0; i < circlesInRing; i++) {
                         if (circleIndex >= circles.length) break;
-        
+
                         const circle = circles[circleIndex];
                         circle.isRotational = rotationMode === 1 || (combinationMode && Math.random() < 0.5);
-        
+
                         if (circle.isRotational) {
                             const angle = i * angleStep;
                             circle.x = centerX + currentRingRadius * Math.cos(angle);
@@ -518,12 +530,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             circle.centerX = centerX;
                             circle.centerY = centerY;
                             circle.ringRadius = currentRingRadius;
-                            circle.direction = 1;
+                            circle.direction = direction; // Set direction based on group
                             circle.speed = speed;
                         }
-        
+
                         circleIndex++;
                     }
+
+                    currentRingRadius += baseRadiusSpacing;
                 }
             }
         }
@@ -631,7 +645,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     displayedNumbers.push(numbers[selected]);
                     sequence.push(index);
 
-
                     selected++;
                     setTimeout(selectNext, selectTime);
                 } else {
@@ -639,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (flashMode) {
                         clearInterval(flashInterval);
                         circles.forEach(circle => {
-                            if(circle.color === 'transparent') {
+                            if (circle.color === 'transparent') {
                                 circle.color = circle.originalColor === "transparent" ? "blue" : circle.originalColor;
                             }
                         });
@@ -650,7 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const lastCircle = circles[sequence[selected - 1]];
                         lastCircle.number = null;
                         lastCircle.color = lastCircle.originalColor === "transparent" ? 'blue' : lastCircle.originalColor;
-                    };
+                    }
 
                     // Redraw the canvas after updating the circle states
                     draw();
@@ -686,8 +699,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (userSequence.length === sequence.length) {
                 checkSequence();
-            };
-        };
+            }
+        }
 
         function checkSequence() {
             let correct = true;
@@ -849,10 +862,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const circle = circles[i];
                     circle.originalColor = circle.color; // Store the original color
                     circle.color = 'transparent';
-                        setTimeout(() => {
-                            circle.color = circle.originalColor === "transparent" ? "blue" : circle.originalColor;
-                        }, 500);
-                        });
+                    setTimeout(() => {
+                        circle.color = circle.originalColor === "transparent" ? "blue" : circle.originalColor;
+                    }, 500);
+                });
             }, 2000);
         }
 

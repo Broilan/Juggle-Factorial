@@ -1,4 +1,4 @@
-# Jiggle Factorial
+# Juggle Factorial
 
 Jiggle Factorial is a JavaScript-based game designed to mimic Brain HQ's "Juggle Factor," which measures and improves multitasking ability, processing speed, working memory, and attention.
 

@@ -102,6 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('delay-input').value = settings.delayTime;
             document.getElementById('rotation-groups-input').value = settings.rotationGroups;
 
+            if (settings.movementTypes.normal) {
+                document.getElementById('rotation-groups-input').parentElement.style.display = 'none';
+            } else {
+                document.getElementById('rotation-groups-input').parentElement.style.display = 'block';
+            };
+
             toggleRotationGroupsInput(settings.movementTypes.rotation || settings.movementTypes.combination);
 
             // Add event listener for window resize
@@ -131,9 +137,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         function saveSettings() {
-            const level = Math.min(parseInt(document.getElementById('level-input').value, 10), 30);
-            const randomDistractors = Math.min(parseInt(document.getElementById('random-distractors-input').value, 10), 20);
-            const rotationGroups = parseInt(document.getElementById('rotation-groups-input').value, 10);
+            const level = Math.min(Math.max(parseInt(document.getElementById('level-input').value, 10), 2), 30);
+            const randomDistractors = Math.min(Math.max(parseInt(document.getElementById('random-distractors-input').value, 10), 0), 20);
+            const rotationGroups = Math.min(Math.max(parseInt(document.getElementById('rotation-groups-input').value, 10), 1), 4);
+
+            settings.randomDistractors = randomDistractors;
+            settings.rotationGroups = rotationGroups;
+            settings.level = level;
 
             settings.spanTypes.forwards = document.getElementById('forwards-btn').checked;
             settings.spanTypes.backwards = document.getElementById('backwards-btn').checked;
@@ -147,13 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
             settings.autoProgression = document.getElementById('progression-btn').textContent.includes('On');
             settings.showAnswers = document.getElementById('show-answers-btn').textContent.includes('On');
 
-            settings.level = level;
-            settings.timer = parseInt(document.getElementById('timer-input').value, 10);
-            settings.selectTime = parseFloat(document.getElementById('select-time-input').value);
-            settings.randomDistractors = randomDistractors;
-            settings.speed = parseFloat(document.getElementById('speed-input').value);
-            settings.delayTime = parseFloat(document.getElementById('delay-input').value);
-            settings.rotationGroups = rotationGroups;
+            settings.timer = Math.min(Math.max(parseInt(document.getElementById('timer-input').value, 10), 5), 180);
+            settings.selectTime = Math.min(Math.max(parseFloat(document.getElementById('select-time-input').value), 1), 10);
+            settings.speed = Math.min(Math.max(parseFloat(document.getElementById('speed-input').value), 1), 10);
+            settings.delayTime = Math.min(Math.max(parseFloat(document.getElementById('delay-input').value), 1), 60);
 
             localStorage.setItem('settings', JSON.stringify(settings));
             location.reload();
@@ -199,21 +206,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 rotationBox.checked = false;
                 combinationBox.checked = false;
                 settings.rotationGroups = 0;
-                toggleRotationGroupsInput(false);
+                document.getElementById('rotation-groups-input').parentElement.style.display = 'none';
             };
 
             rotationBox.onclick = () => {
                 normalBox.checked = false;
                 combinationBox.checked = false;
                 settings.rotationGroups = 1;
-                toggleRotationGroupsInput(true);
+                document.getElementById('rotation-groups-input').parentElement.style.display = 'block';
             };
 
             combinationBox.onclick = () => {
                 normalBox.checked = false;
                 rotationBox.checked = false;
                 settings.rotationGroups = 1;
-                toggleRotationGroupsInput(false);
+                document.getElementById('rotation-groups-input').parentElement.style.display = 'block';
             };
 
             if (!normalBox.checked && !rotationBox.checked && !combinationBox.checked) {
@@ -232,11 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 combinationBox.checked = false;
             }
 
-        }
-
-        function toggleRotationGroupsInput(show) {
-            const rotationGroupsInput = document.getElementById('rotation-groups-input').parentElement;
-            rotationGroupsInput.style.display = show ? 'block' : 'none';
         }
 
         document.getElementById('forwards-btn').addEventListener('change', handleSpanTypeChange);
@@ -376,15 +378,6 @@ document.addEventListener('DOMContentLoaded', () => {
             flashMode = settings.flashMode;
             autoProgression = settings.autoProgression;
             showAnswers = settings.showAnswers;
-
-            if (!spanModes.forwards && !spanModes.backwards) {
-                alert("Please select a span type to start the game.");
-                return;
-            }
-            if (!randomMode && rotationMode === 0 && !combinationMode) {
-                alert("Please select at least one movement type.");
-                return;
-            }
 
             fullResetGame();
             createCircles();

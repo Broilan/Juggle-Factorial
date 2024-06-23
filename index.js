@@ -1,4 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
+    function getMaxBalls() {
+        const screenWidth = window.innerWidth;
+        if (screenWidth >= 1024) {
+            return 100; // Desktop
+        } else if (screenWidth >= 375) {
+            return 50; // iPhone 12
+        } else if (screenWidth >= 320) {
+            return 40; // iPhone SE
+        } else {
+            return 30; // Smaller screens
+        }
+    }
+
     function loadModal() {
         fetch('../Settings/settings-modal.html')
             .then(response => response.text())
@@ -8,14 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.rel = 'stylesheet';
                 link.href = '../Settings/settings-modal.css';
                 document.head.appendChild(link);
-
                 initializeModal();
             });
     }
 
     function initializeModal() {
-        console.log("Initializing modal");
-
         let modal = document.getElementById("settingsModal");
         let openModalBtn = document.getElementById("settingsBtn");
         let closeModalBtn = document.getElementById("closeBtn");
@@ -40,8 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeSettings() {
-        console.log("Initializing settings");
-
         const settings = {
             spanTypes: {
                 forwards: true,
@@ -66,19 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         function loadSettings() {
-            console.log("Loading settings from local storage");
             const savedSettings = JSON.parse(localStorage.getItem('settings'));
             if (savedSettings) {
-                console.log("Saved settings found:", savedSettings);
                 Object.assign(settings, savedSettings);
-            } else {
-                console.log("No saved settings found. Using default settings.");
             }
             applySettings();
         }
 
         function applySettings() {
-            console.log("Applying settings:", settings);
             document.getElementById('forwards-btn').checked = settings.spanTypes.forwards;
             document.getElementById('backwards-btn').checked = settings.spanTypes.backwards;
             document.getElementById('sequencing-btn').checked = settings.spanTypes.sequencing;
@@ -106,30 +109,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
             function checkScreenSize() {
                 const rotationBtn = document.getElementById('rotation-btn');
-                if (window.matchMedia("(max-width: 1024px)").matches) {
+                const combinationBtn = document.getElementById('combination-btn');
+
+                if (window.innerWidth < 750 || window.innerHeight < 750) {
                     rotationBtn.disabled = true;
+                    combinationBtn.disabled = true;
+
                     document.getElementById("rotation-btn-tooltip").textContent = "Unavailable on this device.";
+                    document.getElementById("combination-btn-tooltip").textContent = "Unavailable on this device.";
+
+                } else if (window.innerWidth < 1000 || window.innerHeight < 1000) {
+                    document.getElementById('rotation-groups-input').max = 3;
+
                 } else {
                     rotationBtn.disabled = false;
+                    combinationBtn.disabled = false;
                 }
+
             }
             checkScreenSize();
-        }
+        };
 
         function saveSettings() {
-            console.log("Saving settings");
-
-            const level = parseInt(document.getElementById('level-input').value, 10);
-            const randomDistractors = parseInt(document.getElementById('random-distractors-input').value, 10);
+            const level = Math.min(parseInt(document.getElementById('level-input').value, 10), 30);
+            const randomDistractors = Math.min(parseInt(document.getElementById('random-distractors-input').value, 10), 20);
             const rotationGroups = parseInt(document.getElementById('rotation-groups-input').value, 10);
-
-            const totalCircles = level + randomDistractors;
-            const requiredCircles = rotationGroups * 8;
-
-            if (settings.movementTypes.rotation && totalCircles < requiredCircles && document.getElementById('rotation-btn').checked === true) {
-                alert(`Minimum of ${requiredCircles} total balls required for rotation mode with ${rotationGroups} groups.`);
-                return;
-            }
 
             settings.spanTypes.forwards = document.getElementById('forwards-btn').checked;
             settings.spanTypes.backwards = document.getElementById('backwards-btn').checked;
@@ -152,26 +156,39 @@ document.addEventListener('DOMContentLoaded', () => {
             settings.rotationGroups = rotationGroups;
 
             localStorage.setItem('settings', JSON.stringify(settings));
-            console.log("Settings saved:", settings);
             location.reload();
-        }
+        };
 
         function handleSpanTypeChange() {
             const forwardsBox = document.getElementById('forwards-btn');
             const backwardsBox = document.getElementById('backwards-btn');
             const sequencingBox = document.getElementById('sequencing-btn');
 
-            if (forwardsBox.checked && backwardsBox.checked) {
+            forwardsBox.onclick = () => {
                 backwardsBox.checked = false;
-            }
+                forwardsBox.checked = true;
+            };
 
-            if (forwardsBox.checked || backwardsBox.checked) {
-                sequencingBox.disabled = false;
-            } else {
-                sequencingBox.checked = false;
-                sequencingBox.disabled = true;
-            }
-        }
+            backwardsBox.onclick = () => {
+                forwardsBox.checked = false;
+                backwardsBox.checked = true;
+            };
+
+            sequencingBox.onclick = () => {
+                if(sequencingBox.checked) {
+                    sequencingBox.checked = false;
+                } else {
+                    sequencingBox.checked = true;
+                }
+            };
+
+            if (!forwardsBox.checked && !backwardsBox.checked && !sequencingBox.checked) {
+                forwardsBox.checked = true;
+            } else if (forwardsBox.checked && backwardsBox.checked) {
+                forwardsBox.checked = true;
+                backwardsBox.checked = false;
+            };
+        };
 
         function handleMovementTypeChange() {
             const normalBox = document.getElementById('normal-btn');
@@ -263,8 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeGame() {
-        console.log("Initializing game");
-
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const levelDisplay = document.getElementById('level-display');
@@ -381,7 +396,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function fullResetGame() {
-            console.log("Full game reset");
             clearTimeout(selectionTimeout);
             clearInterval(interval);
             clearInterval(animationInterval);
@@ -399,7 +413,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function resetGame() {
-            console.log("Game reset");
             circles = [];
             sequence = [];
             displayedNumbers = [];
@@ -410,8 +423,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function createCircles() {
-            console.log("Creating circles");
-            const totalCircles = currentLevel + randomDistractors;
+            const maxBalls = getMaxBalls();
+            const totalCircles = Math.min(currentLevel + randomDistractors, maxBalls);
             let attempts = 0;
         
             // Clear previous circles
@@ -422,11 +435,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const distractorCircles = [];
         
             // Create blue circles with numbers first
-            for (let i = 0; i < currentLevel; i++) {
+            for (let i = 0; i < Math.min(currentLevel, maxBalls); i++) {
                 let circle;
                 do {
                     if (attempts > 1000) {
-                        console.log('Unable to place circles without overlap');
                         return;
                     }
                     circle = {
@@ -452,11 +464,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         
             // Create distractor circles
-            for (let i = 0; i < randomDistractors; i++) {
+            for (let i = 0; i < Math.min(randomDistractors, maxBalls - blueCircles.length); i++) {
                 let circle;
                 do {
                     if (attempts > 1000) {
-                        console.log('Unable to place circles without overlap');
                         return;
                     }
                     circle = {
@@ -523,7 +534,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-
 
         function checkOverlap(circle, circles) {
             return circles.some(existingCircle => {
@@ -598,7 +608,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function animateCircles() {
-            console.log("Animating circles");
             function loop() {
                 draw();
                 animationInterval = requestAnimationFrame(loop);
@@ -607,7 +616,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function selectCircles() {
-            console.log("Selecting circles");
             let selected = 0;
             let numbers = Array.from({ length: currentLevel }, (_, i) => i + 1);
             if (spanModes.sequencing) {
@@ -618,7 +626,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const previousCircle = circles[sequence[selected - 1]];
                     previousCircle.number = null;
                     previousCircle.color = previousCircle.originalColor || 'blue';
-                    console.log(`Circle ${sequence[selected - 1]} set to original color`);
                 }
                 if (selected < currentLevel) {
                     let index;
@@ -631,7 +638,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     displayedNumbers.push(numbers[selected]);
                     sequence.push(index);
 
-                    console.log(`Circle ${index} set to red with number ${numbers[selected]}`);
 
                     selected++;
                     setTimeout(selectNext, selectTime);
@@ -640,19 +646,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (flashMode) {
                         clearInterval(flashInterval);
                         circles.forEach(circle => {
-                            circle.color = circle.originalColor; // Reset to original color
-                            circle.visible = true; // Ensure all circles are visible
+                            if(circle.color === 'transparent') {
+                                circle.color = circle.originalColor === "transparent" ? "blue" : circle.originalColor;
+                            }
                         });
-                        draw(); // Redraw circles with visibility ensured
                     }
                     circles.forEach(circle => circle.velocity = { x: 0, y: 0 });
 
                     if (selected > 0) {
                         const lastCircle = circles[sequence[selected - 1]];
                         lastCircle.number = null;
-                        lastCircle.color = lastCircle.originalColor || 'blue';
-                        console.log(`Last Circle ${sequence[selected - 1]} set to original color`);
-                    }
+                        lastCircle.color = lastCircle.originalColor === "transparent" ? 'blue' : lastCircle.originalColor;
+                    };
 
                     // Redraw the canvas after updating the circle states
                     draw();
@@ -680,22 +685,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function selectCircle(index) {
-            console.log("Circle selected:", index);
             if (userSequence.includes(index)) return;
             circles[index].color = 'yellow';
-            console.log(`Circle ${index} set to yellow`);
-            console.log(circles[index]);
             userSequence.push(index);
 
             draw();
 
             if (userSequence.length === sequence.length) {
                 checkSequence();
-            }
-        }
+            };
+        };
 
         function checkSequence() {
-            console.log("Checking sequence");
             let correct = true;
             let correctSequence;
 
@@ -724,7 +725,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 showCustomAlert('success', 'Success! Incrementing level.', () => {
                     levelHistory.push(currentLevel);
                     updateAverageLevel();
-                    if (autoProgression) {
+                    if (currentLevel === 30) {
+                        alert("Congratulations! You've completed all levels!");
+                        location.reload();
+                    } else if (autoProgression) {
                         currentLevel++;
                     }
                     settings.level = currentLevel;
@@ -792,47 +796,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function showCorrectSequence(callback) {
-            console.log("Showing correct sequence");
-            console.log("Sequence: ", sequence);
-            console.log("Displayed Numbers: ", displayedNumbers);
-
             sequence.forEach((index, i) => {
                 circles[index].number = displayedNumbers[i];
                 circles[index].color = 'green';
             });
-
-            // Redraw circles to display the correct sequence
             draw();
-
             setTimeout(() => {
                 sequence.forEach(index => {
                     circles[index].number = null;
                     circles[index].color = 'blue';
                 });
-
-                // Redraw circles to clear the sequence display
                 draw();
-
                 callback();
             }, 3000);
         }
 
         function startTimer() {
-            console.log("Starting timer");
             timer = setInterval(() => {
                 timeLeft--;
                 timerDisplay.textContent = `${timeLeft}s`;
                 if (timeLeft === 0) {
                     clearInterval(timer);
-                    alert('Time is up! Game Over.');
-                    levelHistory.push(currentLevel);
-                    updateAverageLevel();
-                    if (autoProgression) {
-                        currentLevel = Math.max(1, currentLevel - 1);
-                    }
-                    settings.level = currentLevel;
-                    localStorage.setItem('settings', JSON.stringify(settings));
-                    startGame();
+                    showCustomAlert('failure', 'Time\'s up! Decrementing level.', () => {
+                        levelHistory.push(currentLevel);
+                        updateAverageLevel();
+                        if (autoProgression) {
+                            currentLevel = Math.max(1, currentLevel - 1);
+                        }
+                        settings.level = currentLevel;
+                        localStorage.setItem('settings', JSON.stringify(settings));
+                        startGame();
+                    });
                 }
             }, 1000);
         }
@@ -850,29 +844,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function startFlashMode() {
-            console.log("Starting flash mode");
             flashInterval = setInterval(() => {
-                const numCirclesToFlash = Math.floor(Math.random() * (circles.length / 2)) + 1;
+                const numCirclesToFlash = Math.floor(circles.length / 3);
                 const circlesToFlash = [];
 
                 for (let i = 0; i < numCirclesToFlash; i++) {
-                    let randomIndex;
-                    do {
-                        randomIndex = Math.floor(Math.random() * circles.length);
-                    } while (circlesToFlash.includes(randomIndex));
-                    circlesToFlash.push(randomIndex);
+                    circlesToFlash.push(numCirclesToFlash * i + Math.floor(Math.random() * numCirclesToFlash));
                 }
 
-                circlesToFlash.forEach(index => {
-                    const circle = circles[index];
+                circlesToFlash.forEach((c, i) => {
+                    const circle = circles[i];
                     circle.originalColor = circle.color; // Store the original color
                     circle.color = 'transparent';
-
-                    setTimeout(() => {
-                        circle.color = circle.originalColor;
-                        draw(); // Redraw each time a circle reverts to original color
-                    }, 500);
-                });
+                        setTimeout(() => {
+                            circle.color = circle.originalColor === "transparent" ? "blue" : circle.originalColor;
+                        }, 500);
+                        });
             }, 2000);
         }
 

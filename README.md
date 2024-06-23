@@ -46,3 +46,7 @@ Jiggle Factorial is a JavaScript-based game designed to mimic Brain HQ's "Juggle
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.
+
+## Play Here
+
+https://main--juggle-factorial.netlify.app/gameboard/gameboard
